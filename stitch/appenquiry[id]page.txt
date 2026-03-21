@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-header {
+            background: rgba(2, 0, 53, 0.6);
+            backdrop-filter: blur(20px);
+        }
+        .chat-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e2e2;
+            border-radius: 10px;
+        }
+        .sla-progress-ring {
+            transform: rotate(-90deg);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "error-container": "#ffdad6",
+                "outline": "#777680",
+                "on-tertiary-container": "#b67268",
+                "on-tertiary": "#ffffff",
+                "on-surface-variant": "#47464f",
+                "surface-container-highest": "#e2e2e2",
+                "surface-dim": "#dadada",
+                "on-secondary-fixed-variant": "#614000",
+                "error": "#ba1a1a",
+                "on-background": "#1a1c1c",
+                "on-tertiary-fixed-variant": "#6e372f",
+                "surface-container": "#eeeeee",
+                "secondary-fixed-dim": "#ffba41",
+                "on-secondary": "#ffffff",
+                "tertiary": "#000000",
+                "on-surface": "#1a1c1c",
+                "surface-container-high": "#e8e8e8",
+                "on-error": "#ffffff",
+                "tertiary-fixed": "#ffdad4",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed": "#151546",
+                "surface-tint": "#59598d",
+                "primary-container": "#151546",
+                "on-tertiary-fixed": "#370d08",
+                "on-secondary-container": "#6b4800",
+                "on-primary-container": "#7e7fb6",
+                "on-secondary-fixed": "#281800",
+                "tertiary-fixed-dim": "#ffb4a8",
+                "surface-bright": "#f9f9f9",
+                "primary": "#020035",
+                "on-primary": "#ffffff",
+                "background": "#f9f9f9",
+                "surface-container-low": "#f3f3f4",
+                "inverse-on-surface": "#f0f1f1",
+                "tertiary-container": "#370d08",
+                "on-error-container": "#93000a",
+                "outline-variant": "#c8c5d0",
+                "secondary-container": "#feb21b",
+                "secondary": "#7f5600",
+                "primary-fixed": "#e1dfff",
+                "surface-variant": "#e2e2e2",
+                "secondary-fixed": "#ffddae",
+                "inverse-surface": "#2f3131",
+                "surface": "#f9f9f9",
+                "primary-fixed-dim": "#c1c1fc",
+                "on-primary-fixed-variant": "#414274",
+                "inverse-primary": "#c1c1fc"
+              },
+              fontFamily: {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 glass-header flex justify-between items-center px-4 md:px-8 h-16 shadow-[0_20px_50px_-12px_rgba(2,0,53,0.08)] bg-gradient-to-r from-[#020035] to-[#151546]">
+<div class="flex items-center gap-4">
+<button class="text-white hover:bg-white/10 p-2 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-secondary-container tracking-widest uppercase">Academic Curator</span>
+<h1 class="text-white font-headline font-bold text-base md:text-lg tracking-tight">Detail Enquiry View</h1>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<div class="flex items-center gap-6">
+<a class="text-slate-300 hover:text-white transition-colors text-sm font-medium" href="#">Dashboard</a>
+<a class="text-secondary-container border-b-2 border-secondary-container pb-1 text-sm font-medium" href="#">Enquiries</a>
+<a class="text-slate-300 hover:text-white transition-colors text-sm font-medium" href="#">Resources</a>
+<a class="text-slate-300 hover:text-white transition-colors text-sm font-medium" href="#">Archives</a>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-300 cursor-pointer hover:text-white transition-colors">notifications</span>
+<span class="material-symbols-outlined text-slate-300 cursor-pointer hover:text-white transition-colors">help_outline</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmQ44MAQpgKcNhk7MsEy3N35KNsRFDpbndZ5S-gTnc92mponnCswYi1XLoQ71TXNwAsrzWkncLP9Sp3xm4d2hGPz_qK_wTgug10yA482PS3MgUJvU5_XIClbG9U3kYp6QzoAl8hxsVPZckMdxxTg9VHfXH7Zr1AeMSvH8wq4P91jtN-4dfvi5EedDMTp-DMG5stgiXtwYeaMjY4pb98kyCniE7Q3xlzuqxFj8q5Vj5xVJOXqd5XUE9O_n76_W7Y88JLGZrVtinem0"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen">
+<!-- Sub-Header / Status Bar -->
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant font-medium text-sm">#ENQ-8821</span>
+<span class="px-3 py-0.5 rounded-full border border-secondary-container text-secondary text-[11px] font-bold uppercase tracking-wider">Academic - Học thuật</span>
+</div>
+<h2 class="text-2xl md:text-3xl font-headline font-extrabold text-primary tracking-tight">Đăng ký môn học muộn - HK2</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-primary text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/10">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="text-sm font-semibold tracking-wide">Status: Assigned</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-10 gap-8">
+<!-- Left Panel: Enquiry Info -->
+<section class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest p-6 md:p-8 rounded-xl shadow-[0_20px_50px_-12px_rgba(2,0,53,0.04)]">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-14 h-14 bg-surface-container-low rounded-xl flex items-center justify-center text-primary overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuNeGL3B0SNUqdgp6WOeuP6ri8TfSuGcjbmniXExWQUvb6rhwezzSSP5jVKLG6ugFymUFx9YgP2v56PRroXkiR7ZZ5yR0FiW9Yly8FpMkYJg8Yo3FgTgjaCzT6TXZdWs5SG35IvA4ZgswKMqCkOE3Jq1qERam5V5_sIniKzlQ1ZZfpx_BuCiWhKNeNkfL1mrtXOobq7NgzhLJTKhD9V96pjUs_j3AuILBukMhiMQ9zPqDufoJSlGCYZBs4DLrF_K-l0Or3Bb7ESZA"/>
+</div>
+<div>
+<h3 class="text-xl font-headline font-bold text-primary">Nguyễn Văn A</h3>
+<p class="text-on-surface-variant text-sm font-medium">Student ID: 23070983</p>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest">Submission Date</span>
+<p class="text-on-surface font-medium">20/05/2024, 14:00</p>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest">Enquiry Description</span>
+<div class="bg-surface-container-low p-5 rounded-xl text-on-surface-variant text-sm leading-relaxed border-l-4 border-secondary-container">
+                            Em chào thầy cô ạ, do lỗi hệ thống nên em chưa kịp đăng ký môn "Cơ sở dữ liệu" trong đợt đăng ký vừa qua. Em mong thầy cô xem xét cho em được bổ sung danh sách lớp học này trong học kỳ 2. Em xin cảm ơn.
+                        </div>
+</div>
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold text-outline uppercase tracking-widest">Attached Documents</span>
+<div class="grid grid-cols-1 gap-2">
+<div class="flex items-center justify-between p-3 bg-white border border-outline-variant/20 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">picture_as_pdf</span>
+<span class="text-sm font-medium text-on-surface">transcript.pdf</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">download</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-white border border-outline-variant/20 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-fixed-variant">description</span>
+<span class="text-sm font-medium text-on-surface">request_form.docx</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">download</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Enhanced SLA Timer -->
+<div class="bg-primary p-6 rounded-xl text-white flex items-center justify-between overflow-hidden relative shadow-lg shadow-primary/20">
+<div class="z-10">
+<p class="text-[10px] font-bold text-secondary-container uppercase tracking-widest mb-1">Response Progress</p>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-headline font-extrabold text-secondary-container">4h 22m</span>
+<span class="text-white/60 text-sm font-medium">/ 24h SLA</span>
+</div>
+<div class="mt-4 w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+<div class="bg-secondary-container h-full w-[18%]" style="width: 18.2%;"></div>
+</div>
+</div>
+<div class="relative z-10 w-16 h-16">
+<svg class="sla-progress-ring w-full h-full" viewbox="0 0 100 100">
+<circle class="text-white/10" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-secondary-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="205" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-container text-xl" style="font-variation-settings: 'FILL' 1;">timer</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Panel: Communication Thread -->
+<section class="lg:col-span-6 flex flex-col h-[750px] bg-surface-container-low rounded-xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(2,0,53,0.04)]">
+<!-- Thread Header -->
+<div class="bg-white px-6 py-4 flex items-center justify-between border-b border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-highest overflow-hidden">
+<img alt="Student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuNeGL3B0SNUqdgp6WOeuP6ri8TfSuGcjbmniXExWQUvb6rhwezzSSP5jVKLG6ugFymUFx9YgP2v56PRroXkiR7ZZ5yR0FiW9Yly8FpMkYJg8Yo3FgTgjaCzT6TXZdWs5SG35IvA4ZgswKMqCkOE3Jq1qERam5V5_sIniKzlQ1ZZfpx_BuCiWhKNeNkfL1mrtXOobq7NgzhLJTKhD9V96pjUs_j3AuILBukMhiMQ9zPqDufoJSlGCYZBs4DLrF_K-l0Or3Bb7ESZA"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-white bg-primary overflow-hidden flex items-center justify-center">
+<img alt="Staff" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8LM957PEVCOHY8jyTnvSzkVcBDtgOTiMznTRS3OntiPeSARZxmwKo_sXhDjWwv6s--bya9ST7gGV7Fhj7TTwB_aHUgeQjYcgjdD4RurIzIrWd3_cM7RVjJRwz1-dnwHbwiEVTjtttDKxjxTBuL6ZEkHxHbae61_86lUEsNw270t2hxXdDI8dr7Xg2jP9U5jES_Q_XpycE7Tsj7Gunmpc3AQAZ4fcNgQ_gNqtS6ovXg6PYdVWFum0RwXkxz2bZsnzIYTDB1nfXcHY"/>
+</div>
+</div>
+<span class="text-sm font-bold text-primary">Conversation History</span>
+</div>
+<span class="text-[11px] font-medium text-outline">Last message 15 mins ago</span>
+</div>
+<!-- Messages Container -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8 chat-scrollbar">
+<!-- Student Message -->
+<div class="flex gap-4 max-w-[90%]">
+<div class="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-slate-200 mt-6">
+<img alt="Student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuNeGL3B0SNUqdgp6WOeuP6ri8TfSuGcjbmniXExWQUvb6rhwezzSSP5jVKLG6ugFymUFx9YgP2v56PRroXkiR7ZZ5yR0FiW9Yly8FpMkYJg8Yo3FgTgjaCzT6TXZdWs5SG35IvA4ZgswKMqCkOE3Jq1qERam5V5_sIniKzlQ1ZZfpx_BuCiWhKNeNkfL1mrtXOobq7NgzhLJTKhD9V96pjUs_j3AuILBukMhiMQ9zPqDufoJSlGCYZBs4DLrF_K-l0Or3Bb7ESZA"/>
+</div>
+<div class="flex flex-col items-start gap-1">
+<div class="flex items-center gap-2 px-1">
+<span class="text-[11px] font-bold text-primary uppercase">Nguyễn Văn A</span>
+<span class="text-[10px] text-outline">20/05/2024, 14:00</span>
+</div>
+<div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm text-sm text-on-surface leading-relaxed border border-slate-100">
+                            Thầy cô cho em hỏi khi nào thì có kết quả xét duyệt đăng ký muộn ạ? Em sợ trễ lịch học buổi đầu tiên của tuần tới.
+                        </div>
+</div>
+</div>
+<!-- Staff Message -->
+<div class="flex gap-4 flex-row-reverse max-w-[90%] ml-auto">
+<div class="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-primary flex items-center justify-center mt-6">
+<img alt="Staff" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8LM957PEVCOHY8jyTnvSzkVcBDtgOTiMznTRS3OntiPeSARZxmwKo_sXhDjWwv6s--bya9ST7gGV7Fhj7TTwB_aHUgeQjYcgjdD4RurIzIrWd3_cM7RVjJRwz1-dnwHbwiEVTjtttDKxjxTBuL6ZEkHxHbae61_86lUEsNw270t2hxXdDI8dr7Xg2jP9U5jES_Q_XpycE7Tsj7Gunmpc3AQAZ4fcNgQ_gNqtS6ovXg6PYdVWFum0RwXkxz2bZsnzIYTDB1nfXcHY"/>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-2 px-1">
+<span class="text-[10px] text-outline">20/05/2024, 15:30</span>
+<span class="text-[11px] font-bold text-secondary uppercase">Academic Staff</span>
+</div>
+<div class="bg-[#020035] p-4 rounded-2xl rounded-tr-none shadow-md text-sm text-white leading-relaxed">
+                            Chào em, yêu cầu của em đã được tiếp nhận và chuyển đến Khoa chuyên môn để xem xét dung lượng lớp. Dự kiến sẽ có kết quả trong vòng 24h làm việc tới. Em vui lòng theo dõi email sinh viên nhé.
+                        </div>
+</div>
+</div>
+<!-- Student Message -->
+<div class="flex gap-4 max-w-[90%]">
+<div class="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-slate-200 mt-6">
+<img alt="Student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuNeGL3B0SNUqdgp6WOeuP6ri8TfSuGcjbmniXExWQUvb6rhwezzSSP5jVKLG6ugFymUFx9YgP2v56PRroXkiR7ZZ5yR0FiW9Yly8FpMkYJg8Yo3FgTgjaCzT6TXZdWs5SG35IvA4ZgswKMqCkOE3Jq1qERam5V5_sIniKzlQ1ZZfpx_BuCiWhKNeNkfL1mrtXOobq7NgzhLJTKhD9V96pjUs_j3AuILBukMhiMQ9zPqDufoJSlGCYZBs4DLrF_K-l0Or3Bb7ESZA"/>
+</div>
+<div class="flex flex-col items-start gap-1">
+<div class="flex items-center gap-2 px-1">
+<span class="text-[11px] font-bold text-primary uppercase">Nguyễn Văn A</span>
+<span class="text-[10px] text-outline">20/05/2024, 15:45</span>
+</div>
+<div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm text-sm text-on-surface leading-relaxed border border-slate-100">
+                            Vâng em cảm ơn ạ. Em có gửi kèm bảng điểm và đơn xin học bù ở phần đính kèm, thầy cô kiểm tra giúp em đã đủ giấy tờ chưa nhé.
+                        </div>
+</div>
+</div>
+</div>
+<!-- Reply Area -->
+<div class="bg-white p-6 border-t border-outline-variant/10">
+<div class="mb-4">
+<textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-secondary-container placeholder:text-outline transition-all resize-none h-24" placeholder="Type your response to the student... / Nhập phản hồi cho sinh viên..."></textarea>
+</div>
+<div class="flex items-center justify-between">
+<button class="flex items-center gap-2 text-primary font-bold text-sm hover:bg-surface-container-low px-4 py-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg">attach_file</span>
+                        Attach File
+                    </button>
+<button class="bg-secondary-container text-on-secondary-container font-headline font-extrabold px-8 py-2.5 rounded-lg flex items-center gap-2 shadow-lg shadow-secondary-container/20 active:scale-95 transition-transform">
+                        Send Response
+                        <span class="material-symbols-outlined text-lg">send</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Conditional: Student View / Feedback (Shown only if status is 'Resolved') -->
+<!-- Removed 'hidden' class to demonstrate implementation as requested -->
+<div class="mt-12 bg-white p-8 rounded-xl shadow-[0_20px_50px_-12px_rgba(2,0,53,0.04)] hidden" id="feedback-section">
+<div class="max-w-2xl mx-auto text-center space-y-6">
+<div class="w-16 h-16 bg-secondary-container/20 text-secondary-container rounded-full flex items-center justify-center mx-auto">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<h3 class="text-2xl font-headline font-bold text-primary">This enquiry has been marked as Resolved.</h3>
+<p class="text-on-surface-variant mt-2 text-sm">Please take a moment to rate the assistance you received.</p>
+</div>
+<div class="flex justify-center gap-2">
+<span class="material-symbols-outlined text-secondary-container text-4xl cursor-pointer" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary-container text-4xl cursor-pointer" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary-container text-4xl cursor-pointer" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary-container text-4xl cursor-pointer" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-outline-variant text-4xl cursor-pointer">star</span>
+</div>
+<textarea class="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl p-4 text-sm focus:ring-2 focus:ring-secondary-container placeholder:text-outline h-28" placeholder="Feedback của bạn về việc xử lý enquiry này / Your feedback on this enquiry resolution"></textarea>
+<button class="bg-[#FEB21A] text-on-secondary-container font-headline font-extrabold px-10 py-3 rounded-xl shadow-lg shadow-secondary-container/20 hover:brightness-95 transition-all">
+                Submit Feedback / Gửi Feedback
+            </button>
+</div>
+</div>
+<!-- Privacy Footer -->
+<footer class="mt-16 py-8 border-t border-outline-variant/10">
+<p class="text-center text-xs text-on-surface-variant/70 leading-relaxed max-w-2xl mx-auto italic">
+            Thông tin enquiry và trao đổi được bảo mật theo quy định bảo vệ dữ liệu của ABC University và chỉ sử dụng cho mục đích hỗ trợ.
+        </p>
+</footer>
+</main>
+<!-- Staff Floating Actions Bar -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-outline-variant/20 px-4 md:px-6 py-4 rounded-2xl shadow-[0_20px_50px_-12px_rgba(2,0,53,0.15)] flex items-center gap-2 md:gap-3 z-50 w-[90%] md:w-auto overflow-x-auto whitespace-nowrap">
+<button class="px-4 md:px-6 py-2.5 rounded-xl text-primary font-bold text-sm border-2 border-primary hover:bg-primary hover:text-white transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">person_add</span>
+        Assign
+    </button>
+<button class="px-4 md:px-6 py-2.5 rounded-xl text-secondary font-bold text-sm border-2 border-secondary-container hover:bg-secondary-container hover:text-on-secondary-container transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">trending_up</span>
+        Escalate
+    </button>
+<div class="h-8 w-[1px] bg-outline-variant mx-1 md:mx-2 hidden sm:block"></div>
+<button class="px-6 md:px-8 py-2.5 rounded-xl bg-primary text-white font-headline font-bold text-sm shadow-xl shadow-primary/20 hover:bg-opacity-90 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        Mark Resolved
+    </button>
+</div>
+<!-- Floating Chatbot Interface -->
+<div class="fixed bottom-6 right-4 md:right-8 z-50">
+<div class="relative">
+<button class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-2xl">chat_bubble</span>
+</button>
+<span class="absolute top-0 right-0 w-4 h-4 bg-secondary-container border-4 border-surface rounded-full"></span>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLink | Academic Curator - Assigned Complex Enquiries</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-high": "#e8e8e8",
+                        "on-tertiary-fixed": "#370d08",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f3f4",
+                        "primary-fixed-dim": "#c1c1fc",
+                        "on-primary-fixed-variant": "#414274",
+                        "surface-bright": "#f9f9f9",
+                        "inverse-primary": "#c1c1fc",
+                        "outline": "#777680",
+                        "on-secondary-container": "#6b4800",
+                        "on-secondary-fixed-variant": "#614000",
+                        "on-secondary-fixed": "#281800",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#151546",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#c8c5d0",
+                        "secondary-fixed-dim": "#ffba41",
+                        "primary-fixed": "#e1dfff",
+                        "primary": "#020035",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#000000",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#7e7fb6",
+                        "tertiary-fixed-dim": "#ffb4a8",
+                        "tertiary-fixed": "#ffdad4",
+                        "secondary-container": "#feb21b",
+                        "inverse-on-surface": "#f0f1f1",
+                        "on-surface-variant": "#47464f",
+                        "background": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#6e372f",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#151546",
+                        "tertiary-container": "#370d08",
+                        "on-tertiary-container": "#b67268",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dadada",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface": "#f9f9f9",
+                        "surface-tint": "#59598d",
+                        "on-background": "#1a1c1c",
+                        "secondary": "#7f5600",
+                        "inverse-surface": "#2f3131",
+                        "secondary-fixed": "#ffddae",
+                        "surface-variant": "#e2e2e2",
+                        "on-surface": "#1a1c1c"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#020035] dark:bg-slate-950 shadow-[20px_0_50px_-12px_rgba(2,0,53,0.08)] z-50 hidden md:flex flex-col py-8 font-['Manrope'] antialiased">
+<div class="px-6 mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-secondary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="school">school</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-white">UniLink</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary-container/80 font-semibold">Academic Curator</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col space-y-1">
+<!-- Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all hover:bg-[#151546] hover:translate-x-1 duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Assigned Enquiries (ACTIVE) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#FEB21A] text-[#020035] rounded-r-full mr-4 font-bold duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="assignment_late" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+<span>Assigned Enquiries</span>
+</a>
+<!-- Appointments -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all hover:bg-[#151546] hover:translate-x-1 duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span>Appointments</span>
+</a>
+<!-- Profile -->
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all hover:bg-[#151546] hover:translate-x-1 duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Profile</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all hover:bg-[#151546] hover:translate-x-1 duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white transition-all hover:bg-[#151546] hover:translate-x-1 duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="sticky top-0 z-40 w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b-0 ml-0 md:ml-64 w-[calc(100%-16rem)] flex justify-between items-center h-16 px-8 transition-all duration-200">
+<div class="flex items-center gap-4">
+<span class="md:hidden material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<div class="flex flex-col">
+<h2 class="font-['Manrope'] text-xl font-extrabold text-[#020035] dark:text-slate-100">Assigned Complex Enquiries</h2>
+<p class="text-xs text-on-surface-variant font-medium">Your Assigned Complex Cases – Prioritize Urgent</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-lg text-sm focus:ring-2 focus:ring-secondary-container transition-all w-64" placeholder="Global search..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<span class="md:hidden material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<div class="flex flex-col">
+<h2 class="font-['Manrope'] text-xl font-extrabold text-[#020035] dark:text-slate-100">Assigned Complex Enquiries</h2>
+<p class="text-xs text-on-surface-variant font-medium">Your Assigned Complex Cases – Prioritize Urgent</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-0 md:ml-64 p-8 min-h-[calc(100vh-4rem)]">
+<!-- Stats Section (Tonal Layering Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+<!-- My Assigned Open -->
+<div class="bg-[#020035] text-white p-6 rounded-xl shadow-[0_20px_50px_-12px_rgba(2,0,53,0.1)] relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 opacity-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-8xl" data-icon="pending_actions">pending_actions</span>
+</div>
+<p class="text-secondary-container text-xs font-bold uppercase tracking-widest mb-1">My Assigned Open</p>
+<h3 class="text-4xl font-extrabold font-headline">24</h3>
+<div class="mt-4 flex items-center gap-1 text-[10px] text-slate-300">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+<span>12% increase from last week</span>
+</div>
+</div>
+<!-- Escalated This Week -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-l-4 border-error relative overflow-hidden group">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Escalated This Week</p>
+<h3 class="text-4xl font-extrabold font-headline text-error">7</h3>
+<div class="mt-4 flex items-center gap-1 text-[10px] text-error">
+<span class="material-symbols-outlined text-xs" data-icon="warning">warning</span>
+<span>Needs immediate attention</span>
+<span class="ml-2 font-bold">↑ 5% vs last week</span></div>
+</div>
+<!-- Avg. Resolution Time -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative overflow-hidden group">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Avg. Resolution Time</p>
+<h3 class="text-4xl font-extrabold font-headline text-primary">18.5h</h3>
+<div class="mt-4 flex items-center gap-1 text-[10px] text-green-600">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+<span>Within SLA target (24h)</span>
+<span class="ml-2 font-bold">↓ 10% improvement</span></div>
+</div>
+<!-- Urgent Pending -->
+<div class="bg-red-50 p-6 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border-l-4 border-red-500 relative overflow-hidden group">
+<p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Urgent Pending</p>
+<h3 class="text-4xl font-extrabold font-headline text-secondary">5</h3>
+<div class="mt-4 flex items-center gap-1 text-[10px] text-secondary">
+<span class="material-symbols-outlined text-xs" data-icon="timer">timer</span>
+<span>5 overdue priority items</span>
+<span class="ml-2 font-bold text-red-600">↑ 2% increase</span></div>
+</div>
+</div>
+<!-- Filters Section -->
+<div class="bg-surface-container-low p-6 rounded-xl mb-8 flex flex-col md:flex-row gap-4 items-center">
+<div class="relative flex-1 w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border-none pl-12 pr-4 py-3 rounded-lg text-sm focus:ring-2 focus:ring-secondary-container transition-all" placeholder="Search by student ID, title..." type="text"/>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<select class="bg-surface-container-lowest border-none rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-secondary-container min-w-[140px]">
+<option disabled="" selected="">Status</option>
+<option>All</option>
+<option>In Progress</option>
+<option>Escalated</option>
+<option>Resolved</option>
+</select>
+<select class="bg-surface-container-lowest border-none rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-secondary-container min-w-[180px]">
+<option disabled="" selected="">Category</option>
+<option>Academic</option>
+<option>Visa &amp; International</option>
+<option>Graduation &amp; Career</option>
+<option>Welfare</option>
+<option>Financial</option>
+<option>Other</option>
+</select>
+</div>
+</div>
+<!-- Table Section (Asymmetric Editorial Style) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">ID</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Student</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Title</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Category</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Priority</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Assigned</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">SLA</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Last Updated</th><th class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5 text-sm font-semibold text-primary">#ENQ-8821</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Sarah Mitchell</span>
+<span class="text-[10px] text-on-surface-variant">ID: 23070983</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm max-w-[200px] truncate">Scholarship Disbursement Delay</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded text-[10px] font-bold border border-secondary-container text-secondary bg-secondary-container/5 uppercase">Financial</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-error font-bold text-[10px] uppercase">
+<span class="w-1.5 h-1.5 bg-error rounded-full"></span>
+                                    Urgent
+                                </span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">Oct 24, 2024</td>
+<td class="px-6 py-5">
+<span class="text-[11px] font-bold text-error">Due in 4h</span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">15m ago</td><td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+<button class="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+<button class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"><span class="material-symbols-outlined text-sm" data-icon="check">check</span></button></div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5 text-sm font-semibold text-primary">#ENQ-8845</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">James Aris</span>
+<span class="text-[10px] text-on-surface-variant">ID: 21094821</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm max-w-[200px] truncate">Visa Extension for PhD Program</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded text-[10px] font-bold border border-primary text-primary bg-primary/5 uppercase">International</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-secondary font-bold text-[10px] uppercase">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span>
+                                    High
+                                </span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">Oct 23, 2024</td>
+<td class="px-6 py-5">
+<span class="text-[11px] font-bold text-on-surface-variant">12h left</span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">1h ago</td><td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+<button class="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+<button class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"><span class="material-symbols-outlined text-sm" data-icon="check">check</span></button></div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5 text-sm font-semibold text-primary">#ENQ-8910</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Li Wei</span>
+<span class="text-[10px] text-on-surface-variant">ID: 24001298</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm max-w-[200px] truncate">Mental Health Support Referral</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded text-[10px] font-bold border border-green-600 text-green-700 bg-green-50 uppercase">Welfare</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-error font-bold text-[10px] uppercase">
+<span class="w-1.5 h-1.5 bg-error rounded-full"></span>
+                                    Urgent
+                                </span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">Oct 24, 2024</td>
+<td class="px-6 py-5">
+<span class="text-[11px] font-bold text-error">Due in 2h</span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">2h ago</td><td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+<button class="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+<button class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"><span class="material-symbols-outlined text-sm" data-icon="check">check</span></button></div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5 text-sm font-semibold text-primary">#ENQ-8952</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Elena Rodriguez</span>
+<span class="text-[10px] text-on-surface-variant">ID: 22088312</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm max-w-[200px] truncate">Incomplete Grade Appeal (BMAN300)</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded text-[10px] font-bold border border-blue-600 text-blue-700 bg-blue-50 uppercase">Academic</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-on-surface-variant font-bold text-[10px] uppercase">
+<span class="w-1.5 h-1.5 bg-on-surface-variant rounded-full"></span>
+                                    Medium
+                                </span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">Oct 21, 2024</td>
+<td class="px-6 py-5">
+<span class="text-[11px] font-bold text-green-600">SLA Met</span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">4h ago</td><td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+<button class="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+<button class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"><span class="material-symbols-outlined text-sm" data-icon="check">check</span></button></div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-6 py-5 text-sm font-semibold text-primary">#ENQ-9011</td>
+<td class="px-6 py-5">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Marcus Thorne</span>
+<span class="text-[10px] text-on-surface-variant">ID: 23114556</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm max-w-[200px] truncate">Graduation Gown sizing issue</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded text-[10px] font-bold border border-slate-600 text-slate-700 bg-slate-50 uppercase">Other</span>
+</td>
+<td class="px-6 py-5">
+<span class="flex items-center gap-1.5 text-on-surface-variant font-bold text-[10px] uppercase">
+<span class="w-1.5 h-1.5 bg-slate-300 rounded-full"></span>
+                                    Low
+                                </span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">Oct 25, 2024</td>
+<td class="px-6 py-5">
+<span class="text-[11px] font-bold text-on-surface-variant">2d left</span>
+</td>
+<td class="px-6 py-5 text-[11px] text-on-surface-variant">1d ago</td><td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2 group-hover:opacity-100 transition-opacity"><button class="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+<button class="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+<button class="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"><span class="material-symbols-outlined text-sm" data-icon="check">check</span></button></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 bg-surface-container-low/20 flex justify-between items-center text-[10px] text-on-surface-variant">
+<span>Showing 5 of 24 active enquiries</span>
+<div class="flex items-center gap-2">
+<button class="p-1 rounded bg-surface hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-xs" data-icon="chevron_left">chevron_left</span></button>
+<span class="font-bold">Page 1 of 5</span>
+<button class="p-1 rounded bg-surface hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Footnote -->
+<footer class="mt-12 text-center">
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-medium opacity-60">
+                Data shown is anonymized and complies with ABC University privacy policy.
+            </p>
+</footer>
+</main>
+<!-- FloatingActionButton Shell -->
+<div class="fixed bottom-8 right-8 z-50 flex flex-col items-end group">
+<!-- Floating Label -->
+<span class="mb-2 px-3 py-1.5 bg-[#020035] text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-bold whitespace-nowrap">Quick Knowledge Base Search</span>
+<button class="bg-[#FEB21A] text-[#020035] rounded-full h-16 w-16 flex items-center justify-center shadow-[0_10px_30px_rgba(254,178,26,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-white">
+<span class="material-symbols-outlined text-3xl" data-icon="chat_bubble">chat_bubble</span>
+</button>
+</div>
+</body></html>

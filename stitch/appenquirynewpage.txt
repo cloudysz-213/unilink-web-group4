@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UniLink | Nộp Enquiry Mới</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-fixed": "#281800",
+                        "secondary-container": "#feb21b",
+                        "on-tertiary-fixed": "#370d08",
+                        "primary-fixed-dim": "#c1c1fc",
+                        "tertiary-container": "#370d08",
+                        "inverse-primary": "#c1c1fc",
+                        "on-surface": "#1a1c1c",
+                        "surface-container": "#eeeeee",
+                        "surface": "#f9f9f9",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#000000",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-variant": "#e2e2e2",
+                        "surface-bright": "#f9f9f9",
+                        "background": "#f9f9f9",
+                        "inverse-on-surface": "#f0f1f1",
+                        "on-secondary-fixed-variant": "#614000",
+                        "on-tertiary-container": "#b67268",
+                        "inverse-surface": "#2f3131",
+                        "on-background": "#1a1c1c",
+                        "on-surface-variant": "#47464f",
+                        "on-primary-container": "#7e7fb6",
+                        "surface-tint": "#59598d",
+                        "surface-dim": "#dadada",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdad4",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#777680",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#414274",
+                        "primary-container": "#151546",
+                        "secondary": "#7f5600",
+                        "primary": "#000000",
+                        "on-primary-fixed": "#151546",
+                        "on-secondary-container": "#6b4800",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#c8c5d0",
+                        "secondary-fixed-dim": "#ffba41",
+                        "tertiary-fixed-dim": "#ffb4a8",
+                        "surface-container-low": "#f3f3f4",
+                        "on-tertiary-fixed-variant": "#6e372f",
+                        "secondary-fixed": "#ffddae",
+                        "primary-fixed": "#e1dfff",
+                        "on-error": "#ffffff"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #FEB21A;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- SideNavBar Shell -->
+<aside class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-[#020035] dark:bg-[#01001a] shadow-2xl shadow-[#020035]/20">
+<div class="p-8">
+<h1 class="text-2xl font-bold text-white tracking-tight font-headline">UniLink</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-[#FEB21A] mt-1 font-semibold opacity-80">Student Portal</p>
+</div>
+<nav class="flex-1 mt-4">
+<a class="flex items-center gap-3 px-8 py-4 text-slate-300/70 hover:text-white hover:bg-[#151546] transition-all duration-300 font-manrope text-sm font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-8 py-4 text-[#FEB21A] bg-[#151546] border-r-4 border-[#FEB21A] font-manrope text-sm font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+                My Enquiries
+            </a>
+<a class="flex items-center gap-3 px-8 py-4 text-slate-300/70 hover:text-white hover:bg-[#151546] transition-all duration-300 font-manrope text-sm font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                Appointments
+            </a>
+<a class="flex items-center gap-3 px-8 py-4 text-slate-300/70 hover:text-white hover:bg-[#151546] transition-all duration-300 font-manrope text-sm font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+                Profile
+            </a>
+</nav>
+<div class="p-8">
+<button class="w-full py-3 bg-[#FEB21A] text-[#020035] font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-[#ffc247] transition-colors shadow-lg shadow-[#FEB21A]/10">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Enquiry
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center h-16 px-12 sticky top-0 bg-white/60 backdrop-blur-xl z-40">
+<div class="flex items-center gap-8">
+<span class="text-lg font-bold text-[#020035] font-headline">Enquiry System</span>
+<nav class="flex gap-6">
+<a class="text-slate-500 hover:text-[#020035] font-manrope text-sm font-semibold transition-colors" href="#">Directory</a>
+<a class="text-slate-500 hover:text-[#020035] font-manrope text-sm font-semibold transition-colors" href="#">Resources</a>
+<a class="text-slate-500 hover:text-[#020035] font-manrope text-sm font-semibold transition-colors" href="#">Support</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-secondary-container rounded-full border-2 border-white"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer" data-icon="help_outline">help_outline</span>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="Student Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a male university student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD54Ys2FXn6M0ug_F1tYScW3Sj1yNA3Okq65xqQJZ9y1yCsbcdEw4z5krorydvekcpWqdS_tDfnAyWs-AwOcZncyKRRDun0EdTK_kAtcqhd2Oqsx7NJ9Swe9z97fJfH90Hk4aGYPv_C2yRg1tNAYZ5YAPg3WZ0RJloE3Pt2RezvHqhKUQtcFqL3lbR89n_FOD5GBlB1DOGca6sou4k7eHInjP4A5Rv11JeZ68OPo4NjLRVreJ5jSnBB3DA0F4F02p8-TvBOCmxwm_8"/>
+</div>
+</div>
+</header>
+<div class="p-12 flex flex-col gap-12">
+<!-- Header Section -->
+<section class="max-w-4xl">
+<h2 class="text-5xl font-extrabold font-headline tracking-tight text-primary">Nộp Enquiry Mới</h2>
+<p class="mt-4 text-on-surface-variant text-lg max-w-2xl leading-relaxed">
+                    Vui lòng điền thông tin chi tiết dưới đây. Đội ngũ hỗ trợ viên sẽ phản hồi nhanh nhất có thể (trong 24-48 giờ).
+                </p>
+</section>
+<!-- Layout Grid -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Left Column: Form -->
+<div class="col-span-8 space-y-8">
+<div class="bg-surface-container-lowest p-10 rounded-xl shadow-sm border border-outline-variant/10">
+<form class="space-y-8">
+<!-- Title Input -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Tiêu đề Enquiry</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 text-lg transition-all px-0" placeholder="Nhập tiêu đề gọn thắc mắc của bạn" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<!-- Category Dropdown -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Lĩnh vực thắc mắc</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 transition-all px-0 appearance-none">
+<option>Academic (Học thuật)</option>
+<option>Visa &amp; International Students</option>
+<option>Graduation &amp; Career</option>
+<option>Welfare</option>
+<option>Financial</option>
+<option>Other</option>
+</select>
+</div>
+<!-- Priority Toggle -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Độ ưu tiên</label>
+<div class="flex bg-surface-container-low p-1 rounded-lg gap-1">
+<button class="flex-1 py-2 text-sm font-medium rounded bg-white shadow-sm text-on-surface" type="button">Thấp</button>
+<button class="flex-1 py-2 text-sm font-medium text-on-surface-variant hover:bg-white/50 transition-colors" type="button">Trung bình</button>
+<button class="flex-1 py-2 text-sm font-medium text-on-surface-variant hover:bg-white/50 transition-colors" type="button">Cao</button>
+</div>
+</div>
+</div>
+<!-- Related Enquiry -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Liên quan đến enquiry cũ (nếu có)</label>
+<div class="flex items-center gap-3">
+<span class="text-outline text-lg">#</span>
+<input class="w-full bg-surface-container-lowest border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 transition-all px-0" placeholder="VD: ENQ-9988" type="text"/>
+</div>
+</div>
+<!-- Description -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Mô tả chi tiết</label>
+<button class="text-[#6b4800] border border-[#FEB21A] px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-[#FEB21A]/10 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="auto_fix">auto_fix</span>
+                                        Gợi ý bằng AI
+                                    </button>
+</div>
+<textarea class="w-full p-6 bg-surface-container-low border-0 focus:ring-2 focus:ring-[#FEB21A] rounded-xl transition-all resize-none" placeholder="Mô tả cụ thể vấn đề của bạn..." rows="6"></textarea>
+</div>
+<!-- File Upload -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-label">Tài liệu đính kèm</label>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center group hover:border-[#FEB21A] transition-colors cursor-pointer bg-surface-container-low/50">
+<span class="material-symbols-outlined text-4xl text-outline group-hover:text-[#FEB21A] mb-3 transition-colors" data-icon="cloud_upload">cloud_upload</span>
+<p class="text-on-surface font-semibold">Kéo và thả file hoặc click để tải lên</p>
+<p class="text-xs text-on-surface-variant mt-1">PDF, JPG, PNG (Tối đa 10MB)</p>
+</div>
+</div>
+</form>
+</div>
+<!-- Bottom Actions -->
+<div class="flex items-center gap-8 py-4">
+<button class="px-12 py-4 bg-[#FEB21A] text-[#020035] font-extrabold rounded-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#FEB21A]/20 uppercase tracking-widest text-sm">
+                            Gửi Enquiry
+                        </button>
+<a class="text-on-surface-variant font-semibold hover:text-error transition-colors border-b border-transparent hover:border-error pb-1" href="#">Hủy bỏ</a>
+</div>
+</div>
+<!-- Right Column: Contextual Sidebar -->
+<aside class="col-span-4 space-y-8 sticky top-28">
+<!-- AI Assistant Card -->
+<div class="bg-[#020035] rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl shadow-[#020035]/30">
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-primary-container rounded-full opacity-50 blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 bg-[#FEB21A] rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#020035]" data-icon="smart_toy">smart_toy</span>
+</div>
+<h3 class="font-headline font-bold text-lg">UniLink AI Assistant</h3>
+</div>
+<p class="text-slate-300 text-sm leading-relaxed mb-6">
+                                Chat để hỏi FAQ nhanh hoặc được hướng dẫn chọn lĩnh vực enquiry. Không cần login cho câu hỏi cơ bản.
+                            </p>
+<button class="w-full py-3 bg-[#FEB21A] text-[#020035] font-bold rounded-lg hover:bg-white transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="chat">chat</span>
+                                Chat ngay
+                            </button>
+</div>
+</div>
+<!-- Tips List -->
+<div class="bg-surface-container-low rounded-2xl p-8">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant font-label mb-6">Mẹo nộp Enquiry</h3>
+<ul class="space-y-6">
+<li class="flex gap-4">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white text-[10px] font-bold flex items-center justify-center shadow-sm">1</span>
+<p class="text-sm text-on-surface-variant">Cung cấp Mã số sinh viên của bạn nếu thắc mắc liên quan đến học phí.</p>
+</li>
+<li class="flex gap-4">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white text-[10px] font-bold flex items-center justify-center shadow-sm">2</span>
+<p class="text-sm text-on-surface-variant">Đính kèm ảnh chụp màn hình thông báo lỗi (nếu có) để xử lý nhanh hơn.</p>
+</li>
+<li class="flex gap-4">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white text-[10px] font-bold flex items-center justify-center shadow-sm">3</span>
+<p class="text-sm text-on-surface-variant">Kiểm tra mục FAQ trước khi nộp để tiết kiệm thời gian chờ đợi.</p>
+</li>
+</ul>
+</div>
+<!-- Quick Support Links -->
+<div class="px-4">
+<h4 class="text-xs font-bold text-on-surface-variant uppercase mb-4">Hotline Hỗ trợ</h4>
+<div class="flex items-center gap-3 text-primary font-bold">
+<span class="material-symbols-outlined text-secondary" data-icon="phone_in_talk">phone_in_talk</span>
+                            1800-UNILINK
+                        </div>
+</div>
+</aside>
+</div>
+<!-- Footer Section -->
+<footer class="mt-12 border-t border-outline-variant/20 pt-8 pb-12">
+<p class="text-xs text-on-surface-variant/60 max-w-2xl leading-relaxed">
+                    © 2024 ABC University Student Services. All data provided is protected under the University Data Protection Policy. 
+                    UniLink uses high-level encryption to ensure student confidentiality.
+                </p>
+</footer>
+</div>
+</main>
+<!-- Success Toast (Hidden by default, used for demonstration/logic) -->
+<div class="fixed bottom-10 right-10 z-[100] transform translate-y-[200%] opacity-0 pointer-events-none transition-all duration-500">
+<div class="bg-white p-6 rounded-xl shadow-2xl border-l-4 border-emerald-500 flex items-start gap-4 max-w-sm">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Thành công!</h4>
+<p class="text-sm text-on-surface-variant mt-1">Mã enquiry: <span class="font-mono font-bold text-primary">#ENQ-1234</span>. Phản hồi dự kiến trong 24-48 giờ.</p>
+</div>
+</div>
+</div>
+<!-- Floating Chatbot Bubble -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-[#020035] text-[#FEB21A] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+<span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#FEB21A] rounded-full border-2 border-surface"></span>
+</button>
+</body></html>

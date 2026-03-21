@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile Settings - UniLink</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#020035",
+              "accent": "#FEB21A",
+              "surface": "#F8F9FA",
+              "on-surface": "#1a1c1c",
+              "outline-variant": "#c8c5d0",
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .sidebar-active { background-color: rgba(255, 255, 255, 0.1); border-left: 4px solid #FEB21A; }
+    </style>
+</head>
+<body class="bg-[#F0F2F5] text-on-surface antialiased">
+<!-- Floating Toast Notification -->
+<div class="fixed top-8 right-8 z-[100]" id="toast">
+<div class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-bold">Cập nhật thành công!</span>
+</div>
+</div>
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-64 z-40 bg-primary flex flex-col shadow-2xl">
+<div class="px-8 py-10">
+<div class="text-2xl font-black tracking-tighter text-white">UniLink</div>
+</div>
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+<div class="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
+<img alt="User portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh8tRLG2IswTJlbNdDqywgy-RLSbwExQuw1XH6qEH_zr4lrMWfU4p7CXK4_8QVPWB9RaV682bI5Q1zAIN3uCL5cy_Xjn-6SPs9eONP6sgNcAL82Idap-CTZDKmWiDRu-wCFo2LHVRMNkHnI66d9lqB6vR3q2j6tgzlpAiPO4PTJkdkoL0Gy4eTa1PcKNEVUmqM1lKK8vV3-hTpeIZxjktJ3Feph7oTxrf948QlOmpVK1Pd0S4L7RR_NpPRytg5wpkgWdhSYQJbUNU"/>
+</div>
+<div class="overflow-hidden">
+<div class="text-white font-bold text-sm truncate">Julian Sterling</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-wider truncate">Senior Researcher</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span>My Enquiries</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span>Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 sidebar-active text-white rounded-lg text-sm font-medium" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span>Profile</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-white/10">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-all text-sm font-medium" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 min-h-screen">
+<!-- Sticky Sub-header -->
+<header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-12 py-4 flex justify-between items-center">
+<nav class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+<a class="hover:text-primary transition-colors" href="#">Settings</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span class="text-primary">Profile</span>
+</nav>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-slate-200 pr-6">
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+                        Dashboard
+                    </a>
+<a class="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-lg">help_outline</span>
+                        Support
+                    </a>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-primary">Julian Sterling</span>
+<div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden ring-2 ring-slate-100">
+<img alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApPdbRtG-0uGSFrQi-ESHUTfbVYLrzy9y47hVjq6TvhNZ5fSSNm24A-WktfFp3-Hafs2xITlWkR2e50txShAAfusGQpQqcUazGBNzPYNd0MsSqEmof4ISmDLv2-F4ayk1lYmHq8yxrtH6h10Jst35BsKkDnZuhn1MEhrq2FCInmx8mkWjBHASTkHNvn2DGnIluztOj1GE7LDUDRSjzel5KW6gIVzZmFiCNvkIiZTi8QN09OyokUo5pE7k-XdY25zNPSYFPtWP9Lks"/>
+</div>
+</div>
+</div>
+</header>
+<div class="p-12 max-w-7xl mx-auto">
+<!-- Analytics-style Header Section -->
+<section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-10 flex flex-col md:flex-row items-center gap-8">
+<div class="relative">
+<div class="h-36 w-36 rounded-2xl overflow-hidden border-4 border-slate-50 shadow-xl bg-slate-100">
+<img alt="Profile avatar" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLNICPpokzF66lML4d8MeD0uaBZDM5xUSHFB6SVYZKEu4yhAZ9KRY-NJQoFkmu_pqSZNXmq5DC4YC2PXhMUe8VRi2ktw3OW0cHnhsFnc7p2Nc7VgjdDFE4H3yn-Av3APHyHaLypi9twRRtRLMJ5EB6Yjyxia-tNqT-GMrfnAG2u8z5e73VSzVElXTdcoAnSmZKZScYH3UkStvhMjCdH9X6mzx8_EmJE8LywloPj2S01YPfKpSvw0krM7VDS7x0CfxABBovUJA3dQ0"/>
+</div>
+<button class="absolute -bottom-2 -right-2 bg-accent p-2.5 rounded-xl shadow-lg hover:scale-105 transition-transform border-2 border-white">
+<span class="material-symbols-outlined text-base text-primary">photo_camera</span>
+</button>
+</div>
+<div class="flex-1">
+<div class="flex flex-col md:flex-row items-baseline gap-4 mb-3">
+<h1 class="text-4xl font-extrabold text-primary tracking-tight">Julian Sterling</h1>
+<span class="px-3 py-1 bg-accent/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-accent/20">Senior Researcher</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8 max-w-2xl">
+<div class="flex items-center gap-2 text-slate-500 font-medium text-sm">
+<span class="material-symbols-outlined text-lg text-slate-400">badge</span>
+<span>Mã nhân viên: <span class="text-primary font-bold">AC-8821</span></span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 font-medium text-sm">
+<span class="material-symbols-outlined text-lg text-slate-400">mail</span>
+<span>julian.sterling@unilink.edu</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Grid Layout -->
+<div class="grid grid-cols-12 gap-10">
+<!-- Main Form Column -->
+<div class="col-span-12 lg:col-span-8 space-y-10">
+<!-- Personal Information -->
+<div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200">
+<div class="flex items-center gap-3 mb-8">
+<div class="h-10 w-1 bg-accent rounded-full"></div>
+<h3 class="text-xl font-bold text-primary">Personal Information</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">Full Name</label>
+<input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 font-medium transition-all focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none" type="text" value="Julian Sterling"/>
+</div>
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">Phone Number</label>
+<input class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3.5 font-medium transition-all focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none" type="text" value="+1 (555) 012-3456"/>
+</div>
+<div class="md:col-span-2 space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">University Email</label>
+<div class="flex items-center gap-3 w-full bg-slate-100 border border-slate-200 px-4 py-3.5 rounded-xl text-slate-500">
+<span class="material-symbols-outlined text-base">lock</span>
+<span class="font-semibold">julian.sterling@unilink.edu</span>
+</div>
+<p class="text-[10px] text-slate-400 font-medium flex items-center gap-1 pt-1">
+<span class="material-symbols-outlined text-[12px]">info</span>
+                                    Institutional email cannot be changed manually. Please contact Support.
+                                </p>
+</div>
+</div>
+</div>
+<!-- Notification Preferences -->
+<div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200">
+<div class="flex items-center gap-3 mb-8">
+<div class="h-10 w-1 bg-accent rounded-full"></div>
+<h3 class="text-xl font-bold text-primary">Notification Preferences</h3>
+</div>
+<div class="space-y-10">
+<!-- Email Group -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">mail</span>
+<div class="font-bold text-primary text-lg">Email Alerts</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-9">
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input checked="" class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">New enquiries/responses</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input checked="" class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">Status updates</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">Appointment reminders</span>
+</label>
+</div>
+</div>
+<!-- In-app Group -->
+<div class="space-y-6 border-t border-slate-100 pt-10">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">notifications_active</span>
+<div class="font-bold text-primary text-lg">In-app Notifications</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+</label>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-9">
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input checked="" class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">New enquiries/responses</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input checked="" class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">Status updates</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50 transition-all">
+<input checked="" class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent" type="checkbox"/>
+<span class="text-sm font-semibold text-slate-600 group-hover:text-primary transition-colors">Appointment reminders</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Columns -->
+<div class="col-span-12 lg:col-span-4 space-y-10">
+<!-- Preferences Card -->
+<div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200">
+<div class="flex items-center gap-3 mb-8">
+<div class="h-10 w-1 bg-accent rounded-full"></div>
+<h3 class="text-xl font-bold text-primary">Preferences</h3>
+</div>
+<div class="space-y-8">
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">System Language</label>
+<div class="relative">
+<select class="w-full appearance-none bg-slate-50/50 border border-slate-200 px-4 py-3.5 rounded-xl font-semibold text-sm focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none">
+<option>English (US)</option>
+<option>Vietnamese (Tiếng Việt)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500">dark_mode</span>
+<div class="text-sm font-bold text-primary">Dark Mode</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Security Card -->
+<div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12"></div>
+<div class="flex items-center gap-3 mb-8 relative z-10">
+<div class="h-10 w-1 bg-primary rounded-full"></div>
+<h3 class="text-xl font-bold text-primary">Security</h3>
+</div>
+<div class="space-y-6 relative z-10">
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">Current Password</label>
+<input class="w-full bg-slate-50/50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-medium focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none" placeholder="••••••••" type="password"/>
+</div>
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">New Password</label>
+<input class="w-full bg-slate-50/50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-medium focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none" placeholder="Min. 8 characters" type="password"/>
+</div>
+<div class="space-y-2">
+<label class="text-[0.7rem] font-black text-slate-400 uppercase tracking-[0.1em]">Confirm New Password</label>
+<input class="w-full bg-slate-50/50 border border-slate-200 px-4 py-3 rounded-xl text-sm font-medium focus:bg-white focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none" placeholder="Repeat password" type="password"/>
+</div>
+<div class="pt-2">
+<a class="text-xs font-bold text-primary hover:text-accent transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">lock_reset</span>
+                                    Forgot password?
+                                </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Actions -->
+<div class="mt-16 pt-10 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<div>
+<div class="text-sm font-bold text-primary">Secure Infrastructure</div>
+<div class="text-xs text-slate-400 font-medium">Your data is encrypted using enterprise-grade protocols.</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-8 py-4 text-slate-500 font-bold text-sm hover:text-primary transition-colors">
+                        Discard Changes
+                    </button>
+<button class="bg-accent text-primary px-16 py-4 rounded-xl font-black shadow-xl shadow-accent/20 hover:shadow-accent/40 active:scale-[0.98] transition-all text-lg tracking-widest uppercase">
+                        LƯU THAY ĐỔI
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Chatbot Bubble -->
+<div class="fixed bottom-8 right-8 z-50">
+<button class="h-16 w-16 rounded-2xl bg-primary text-accent flex items-center justify-center shadow-2xl hover:scale-110 transition-transform ring-4 ring-white">
+<span class="material-symbols-outlined text-3xl">forum</span>
+</button>
+</div>
+</body></html>
