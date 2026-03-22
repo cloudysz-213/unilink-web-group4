@@ -1,36 +1,149 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { theme } from '@/lib/theme'
+import { toast } from 'sonner'
+import { 
+  ArrowLeft, 
+  Download, 
+  Send, 
+  User, 
+  Paperclip, 
+  CheckCircle,
+  Timer,
+  MoreHorizontal
+} from 'lucide-react'
 
 export default function EnquiryDetailPage() {
+  const router = useRouter()
+  const params = useParams()
+  const enquiryId = params.id as string
+  const supabase = createClient()
+  
+  const [user, setUser] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [enquiry, setEnquiry] = useState<any>(null)
   const [replyText, setReplyText] = useState('')
   const [showFeedback, setShowFeedback] = useState(false)
   const [rating, setRating] = useState(0)
+  const [sending, setSending] = useState(false)
+  const [messages, setMessages] = useState<any[]>([])
 
-  const messages = [
-    {
-      type: 'student',
-      name: 'Nguyễn Văn A',
-      avatar: '👨‍🎓',
-      time: '20/05/2024, 14:00',
-      text: 'Thầy cô cho em hỏi khi nào thì có kết quả xét duyệt đăng ký muộn ạ? Em sợ trễ lịch học buổi đầu tiên của tuần tới.'
-    },
-    {
-      type: 'staff',
-      name: 'Academic Staff',
-      avatar: '👨‍💼',
-      time: '20/05/2024, 15:30',
-      text: 'Chào em, yêu cầu của em đã được tiếp nhận và chuyển đến Khoa chuyên môn để xem xét dung lượng lớp. Dự kiến sẽ có kết quả trong vòng 24h làm việc tới. Em vui lòng theo dõi email sinh viên nhé.'
-    },
-    {
-      type: 'student',
-      name: 'Nguyễn Văn A',
-      avatar: '👨‍🎓',
-      time: '20/05/2024, 15:45',
-      text: 'Vâng em cảm ơn ạ. Em có gửi kèm bảng điểm và đơn xin học bù ở phần đính kèm, thầy cô kiểm tra giúp em đã đủ giấy tờ chưa nhé.'
+  useEffect(() => {
+    const fetchData = async () => {
+      // Get current user
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
+      setUser(currentUser)
+
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single()
+      setUserProfile(profile)
+
+      // Get enquiry details
+      const { data: enquiryData } = await supabase
+        .from('enquiries')
+        .select('*')
+        .eq('id', enquiryId)
+        .single()
+
+      if (enquiryData) {
+        setEnquiry(enquiryData)
+      } else {
+        // Dữ liệu mẫu nếu chưa có
+        setEnquiry({
+          id: enquiryId,
+          title: 'Đăng ký môn học muộn - HK2',
+          description: 'Em chào thầy cô ạ, do lỗi hệ thống nên em chưa kịp đăng ký môn "Cơ sở dữ liệu" trong đợt đăng ký vừa qua. Em mong thầy cô xem xét cho em được bổ sung danh sách lớp học này trong học kỳ 2. Em xin cảm ơn.',
+          category: 'academic',
+          status: 'assigned',
+          created_at: '2024-05-20T14:00:00Z'
+        })
+      }
+
+      // Get messages
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('enquiry_id', enquiryId)
+        .order('created_at', { ascending: true })
+
+      if (messagesData && messagesData.length > 0) {
+        setMessages(messagesData)
+      } else {
+        // Dữ liệu mẫu
+        setMessages([
+          { type: 'student', name: 'Nguyễn Văn A', time: '20/05/2024, 14:00', text: 'Thầy cô cho em hỏi khi nào thì có kết quả xét duyệt đăng ký muộn ạ? Em sợ trễ lịch học buổi đầu tiên của tuần tới.' },
+          { type: 'staff', name: 'Academic Staff', time: '20/05/2024, 15:30', text: 'Chào em, yêu cầu của em đã được tiếp nhận và chuyển đến Khoa chuyên môn để xem xét dung lượng lớp. Dự kiến sẽ có kết quả trong vòng 24h làm việc tới. Em vui lòng theo dõi email sinh viên nhé.' },
+          { type: 'student', name: 'Nguyễn Văn A', time: '20/05/2024, 15:45', text: 'Vâng em cảm ơn ạ. Em có gửi kèm bảng điểm và đơn xin học bù ở phần đính kèm, thầy cô kiểm tra giúp em đã đủ giấy tờ chưa nhé.' }
+        ])
+      }
+
+      setLoading(false)
     }
-  ]
+
+    fetchData()
+  }, [supabase, router, enquiryId])
+
+  const handleSendReply = async () => {
+    if (!replyText.trim()) return
+    setSending(true)
+    
+    // Thêm tin nhắn mới vào state
+    const newMessage = {
+      type: 'student',
+      name: userProfile?.full_name || 'Student',
+      time: new Date().toLocaleString('vi-VN'),
+      text: replyText
+    }
+    setMessages([...messages, newMessage])
+    setReplyText('')
+    toast.success('Đã gửi phản hồi')
+    setSending(false)
+  }
+
+  const handleMarkResolved = () => {
+    setShowFeedback(true)
+    toast.success('Enquiry đã được đánh dấu là đã xử lý')
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: theme.colors.primary }}>
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
+
+  const displayName = userProfile?.full_name || user?.email?.split('@')[0] || 'Student'
+  const studentId = userProfile?.student_id || 'N/A'
+
+  const getCategoryText = (cat: string) => {
+    const map: { [key: string]: string } = {
+      'academic': 'Academic - Học thuật',
+      'visa_international': 'Visa & International',
+      'graduation_career': 'Graduation & Career',
+      'welfare': 'Welfare',
+      'financial': 'Financial',
+      'other': 'Other'
+    }
+    return map[cat] || 'Academic - Học thuật'
+  }
+
+  const getStatusText = (status: string) => {
+    return status === 'assigned' ? 'Assigned' : status === 'open' ? 'Open' : status || 'Assigned'
+  }
 
   return (
     <div className="min-h-screen bg-[#f9f9f9]">
@@ -56,7 +169,7 @@ export default function EnquiryDetailPage() {
             <button className="text-slate-300 hover:text-white transition-colors text-lg">🔔</button>
             <button className="text-slate-300 hover:text-white transition-colors text-lg">❓</button>
             <div className="w-8 h-8 rounded-full bg-slate-400 border-2 border-white overflow-hidden flex items-center justify-center">
-              👨‍💼
+              👤
             </div>
           </div>
         </div>
@@ -68,15 +181,17 @@ export default function EnquiryDetailPage() {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-slate-600 font-medium text-sm">#ENQ-8821</span>
-              <span className="px-3 py-0.5 rounded-full border border-[#FEB21A] text-[#7f5600] text-[11px] font-bold uppercase tracking-wider bg-[#FEB21A]/10">Academic - Học thuật</span>
+              <span className="text-slate-600 font-medium text-sm">#{enquiry?.id?.slice(-6) || 'ENQ-8821'}</span>
+              <span className="px-3 py-0.5 rounded-full border border-[#FEB21A] text-[#7f5600] text-[11px] font-bold uppercase tracking-wider bg-[#FEB21A]/10">
+                {getCategoryText(enquiry?.category)}
+              </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">Đăng ký môn học muộn - HK2</h2>
+            <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">{enquiry?.title}</h2>
           </div>
           <div className="flex items-center gap-4">
             <div className="bg-primary text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg">
               <span className="w-2 h-2 rounded-full bg-[#FEB21A] animate-pulse"></span>
-              <span className="text-sm font-semibold tracking-wide">Status: Assigned</span>
+              <span className="text-sm font-semibold tracking-wide">Status: {getStatusText(enquiry?.status)}</span>
             </div>
           </div>
         </div>
@@ -85,28 +200,30 @@ export default function EnquiryDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           {/* Left Panel: Enquiry Info */}
           <section className="lg:col-span-4 flex flex-col gap-6">
-            {/* Student Info Card */}
+            {/* Student Info Card - HIỂN THỊ TÊN THẬT */}
             <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-14 h-14 bg-slate-200 rounded-xl flex items-center justify-center text-2xl overflow-hidden">
-                  👨‍🎓
+                  👤
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-primary">Nguyễn Văn A</h3>
-                  <p className="text-slate-600 text-sm font-medium">Student ID: 23070983</p>
+                  <h3 className="text-xl font-black text-primary">{displayName}</h3>
+                  <p className="text-slate-600 text-sm font-medium">Student ID: {studentId}</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Submission Date</span>
-                  <p className="text-slate-900 font-medium">20/05/2024, 14:00</p>
+                  <p className="text-slate-900 font-medium">
+                    {enquiry?.created_at ? new Date(enquiry.created_at).toLocaleString('vi-VN') : '20/05/2024, 14:00'}
+                  </p>
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enquiry Description</span>
                   <div className="bg-slate-50 p-5 rounded-xl text-slate-700 text-sm leading-relaxed border-l-4 border-[#FEB21A]">
-                    Em chào thầy cô ạ, do lỗi hệ thống nên em chưa kịp đăng ký môn "Cơ sở dữ liệu" trong đợt đăng ký vừa qua. Em mong thầy cô xem xét cho em được bổ sung danh sách lớp học này trong học kỳ 2. Em xin cảm ơn.
+                    {enquiry?.description}
                   </div>
                 </div>
 
@@ -118,14 +235,14 @@ export default function EnquiryDetailPage() {
                         <span className="text-red-500">📄</span>
                         <span className="text-sm font-medium text-slate-900">transcript.pdf</span>
                       </div>
-                      <span className="text-slate-400 hover:text-primary transition-colors">⬇️</span>
+                      <Download size={16} className="text-slate-400 hover:text-primary transition-colors" />
                     </div>
                     <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
                       <div className="flex items-center gap-3">
                         <span className="text-blue-600">📋</span>
                         <span className="text-sm font-medium text-slate-900">request_form.docx</span>
                       </div>
-                      <span className="text-slate-400 hover:text-primary transition-colors">⬇️</span>
+                      <Download size={16} className="text-slate-400 hover:text-primary transition-colors" />
                     </div>
                   </div>
                 </div>
@@ -144,7 +261,7 @@ export default function EnquiryDetailPage() {
                   <div className="bg-[#FEB21A] h-full" style={{width: '18.2%'}}></div>
                 </div>
               </div>
-              <div className="text-[#FEB21A] text-6xl opacity-20">⏱️</div>
+              <Timer size={48} className="text-[#FEB21A] opacity-20" />
             </div>
           </section>
 
@@ -155,7 +272,7 @@ export default function EnquiryDetailPage() {
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
                   <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden flex items-center justify-center text-sm">
-                    👨‍🎓
+                    👤
                   </div>
                   <div className="w-8 h-8 rounded-full border-2 border-white bg-primary overflow-hidden flex items-center justify-center text-sm">
                     👨‍💼
@@ -171,11 +288,13 @@ export default function EnquiryDetailPage() {
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex gap-4 ${msg.type === 'staff' ? 'flex-row-reverse' : ''} max-w-[90%] ${msg.type === 'staff' ? 'ml-auto' : ''}`}>
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full mt-6 flex items-center justify-center text-lg ${msg.type === 'staff' ? 'bg-primary' : 'bg-slate-200'}`}>
-                    {msg.avatar}
+                    {msg.type === 'staff' ? '👨‍💼' : '👤'}
                   </div>
                   <div className={`flex flex-col ${msg.type === 'staff' ? 'items-end' : 'items-start'} gap-1`}>
                     <div className={`flex items-center gap-2 px-1 ${msg.type === 'staff' ? 'flex-row-reverse' : ''}`}>
-                      <span className="text-[11px] font-bold text-primary uppercase">{msg.name}</span>
+                      <span className="text-[11px] font-bold text-primary uppercase">
+                        {msg.type === 'staff' ? 'Academic Staff' : displayName}
+                      </span>
                       <span className="text-[10px] text-slate-600">{msg.time}</span>
                     </div>
                     <div className={`p-4 rounded-2xl text-sm leading-relaxed ${msg.type === 'staff' ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-slate-900 border border-slate-200 rounded-tl-none'}`}>
@@ -198,18 +317,22 @@ export default function EnquiryDetailPage() {
               </div>
               <div className="flex items-center justify-between">
                 <button className="flex items-center gap-2 text-primary font-bold text-sm hover:bg-slate-100 px-4 py-2 rounded-lg transition-colors">
-                  📎 Attach File
+                  <Paperclip size={16} /> Attach File
                 </button>
-                <button className="bg-[#FEB21A] text-primary font-black px-8 py-2.5 rounded-lg flex items-center gap-2 shadow-lg hover:brightness-110 active:scale-95 transition-all">
+                <button 
+                  onClick={handleSendReply}
+                  disabled={sending || !replyText.trim()}
+                  className="bg-[#FEB21A] text-primary font-black px-8 py-2.5 rounded-lg flex items-center gap-2 shadow-lg hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <Send size={16} />
                   Send Response
-                  <span>📤</span>
                 </button>
               </div>
             </div>
           </section>
         </div>
 
-        {/* Feedback Section (Hidden by default) */}
+        {/* Feedback Section */}
         {showFeedback && (
           <div className="mt-12 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
             <div className="max-w-2xl mx-auto text-center space-y-6">
@@ -260,10 +383,10 @@ export default function EnquiryDetailPage() {
         </button>
         <div className="h-8 w-px bg-slate-300 mx-1 md:mx-2 hidden sm:block"></div>
         <button 
-          onClick={() => setShowFeedback(!showFeedback)}
+          onClick={handleMarkResolved}
           className="px-6 md:px-8 py-2.5 rounded-xl bg-primary text-white font-black text-sm shadow-lg hover:bg-primary/90 transition-all active:scale-95 flex items-center gap-2"
         >
-          ✓ Mark Resolved
+          <CheckCircle size={16} /> Mark Resolved
         </button>
       </div>
 

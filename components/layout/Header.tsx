@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { Bell, HelpCircle, Plus, LogOut } from 'lucide-react'
 
 const theme = {
   colors: {
@@ -18,9 +19,10 @@ interface HeaderProps {
   subtitle?: string
   user: any
   userProfile: any
+  hideGreeting?: boolean
 }
 
-export default function Header({ title, subtitle, user, userProfile }: HeaderProps) {
+export default function Header({ title, subtitle, user, userProfile, hideGreeting = false }: HeaderProps) {
   const router = useRouter()
   const supabase = createClient()
 
@@ -33,45 +35,46 @@ export default function Header({ title, subtitle, user, userProfile }: HeaderPro
   const displayName = userProfile?.full_name || user?.email?.split('@')[0] || 'Student'
 
   return (
-    <header className="fixed top-0 right-0 left-64 h-20 z-40 bg-white/60 backdrop-blur-md flex justify-between items-center px-8 w-full border-b border-outline-variant/20">
+    <header className="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-10 fixed top-0 right-0 left-64 z-40">
       <div className="flex flex-col">
-        <nav className="flex items-center text-[10px] uppercase tracking-wider text-on-surface-variant gap-2 mb-1">
+        <nav className="flex items-center text-[10px] uppercase tracking-wider text-slate-400 gap-2 mb-1">
           <span>Home</span>
           <span className="text-lg">›</span>
-          <span style={{ color: theme.colors.secondary }} className="font-bold">
-            {title}
-          </span>
+          <span className="text-[#FEB21A] font-bold">{title}</span>
         </nav>
-        <h2 className="text-2xl font-extrabold leading-tight" style={{ color: theme.colors.primary }}>
-          Xin chào, {displayName}
-          {subtitle && <span className="text-sm font-normal text-on-surface-variant ml-2">{subtitle}</span>}
-        </h2>
+        {!hideGreeting ? (
+          <h2 className="text-2xl font-extrabold text-[#0A0521]">
+            Xin chào, {displayName}
+            {subtitle && <span className="text-sm font-normal text-slate-500 ml-2">{subtitle}</span>}
+          </h2>
+        ) : (
+          <h2 className="text-2xl font-extrabold text-[#0A0521]">
+            {title}
+          </h2>
+        )}
       </div>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
-          <button className="p-2.5 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant relative text-2xl">
-            🔔
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ backgroundColor: theme.colors.error }}></span>
-          </button>
-          <button className="p-2.5 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant text-2xl">
-            ❓
-          </button>
+          <div className="relative cursor-pointer">
+            <Bell size={22} className="text-slate-400" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </div>
+          <HelpCircle size={22} className="text-slate-400 cursor-pointer" />
         </div>
-        <div className="h-8 w-px bg-outline-variant/30"></div>
+        <div className="h-8 w-px bg-slate-200"></div>
         <Link
           href="/enquiry/new"
-          className="px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:shadow-lg transition-all active:scale-95"
-          style={{ backgroundColor: theme.colors.secondary, color: theme.colors.primary }}
+          className="bg-[#FEB21A] text-[#0A0521] px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-orange-500 transition-all"
         >
-          <span className="text-lg">➕</span>
+          <Plus size={18} />
           New Enquiry
         </Link>
         <button
-          className="text-sm font-bold px-3 py-2 rounded-lg transition-all hover:bg-error/5"
-          style={{ color: theme.colors.error }}
+          className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors"
           onClick={handleLogout}
         >
-          Logout
+          <LogOut size={18} />
+          <span className="text-sm font-medium">Logout</span>
         </button>
       </div>
     </header>

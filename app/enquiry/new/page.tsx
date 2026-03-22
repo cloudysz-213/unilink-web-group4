@@ -46,72 +46,76 @@ export default function NewEnquiryPage() {
     fetchData()
   }, [supabase, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!title || !description) {
-      toast.error('Vui lòng điền đầy đủ tiêu đề và mô tả')
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!title || !description) {
+    toast.error('Vui lòng điền đầy đủ tiêu đề và mô tả')
+    return
+  }
+
+  setSubmitting(true)
+  setErrorMsg('')
+
+  const priorityMap: { [key: string]: string } = {
+    'Thấp': 'Low',
+    'Trung bình': 'Medium',
+    'Cao': 'High'
+  }
+
+  const categoryMap: { [key: string]: string } = {
+    'Academic (Học thuật)': 'academic',
+    'Visa & International Students': 'visa_international',
+    'Graduation & Career': 'graduation_career',
+    'Welfare': 'welfare',
+    'Financial': 'financial',
+    'Other': 'other'
+  }
+
+  const insertData = {
+    title: title,
+    description: description,
+    category: categoryMap[category] || 'other',
+    priority: priorityMap[priority] || 'Medium',
+    status: 'open',
+    student_id: user.id,
+  }
+
+  console.log('Inserting enquiry:', insertData) // Thêm log
+
+  try {
+    const { data, error } = await supabase
+      .from('enquiries')
+      .insert(insertData)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error details:', error) // Log chi tiết
+      setErrorMsg('Lỗi: ' + error.message)
+      toast.error('Gửi enquiry thất bại: ' + error.message)
       return
     }
 
-    setSubmitting(true)
-    setErrorMsg('')
-
-    const priorityMap: { [key: string]: string } = {
-      'Thấp': 'Low',
-      'Trung bình': 'Medium',
-      'Cao': 'High'
-    }
-
-    const categoryMap: { [key: string]: string } = {
-      'Academic (Học thuật)': 'academic',
-      'Visa & International Students': 'visa_international',
-      'Graduation & Career': 'graduation_career',
-      'Welfare': 'welfare',
-      'Financial': 'financial',
-      'Other': 'other'
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('enquiries')
-        .insert({
-          title: title,
-          description: description,
-          category: categoryMap[category] || 'other',
-          priority: priorityMap[priority] || 'Medium',
-          status: 'open',
-          student_id: user.id,
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Supabase error:', error)
-        setErrorMsg('Lỗi: ' + error.message)
-        toast.error('Gửi enquiry thất bại: ' + error.message)
-        setSubmitting(false)
-        return
-      }
-
-      setSubmitted(true)
-      toast.success('Enquiry đã được gửi thành công!')
-      
-      setTitle('')
-      setDescription('')
-      setRelatedEnquiry('')
-      
-      setTimeout(() => {
-        router.push('/dashboard/student')
-      }, 2000)
-      
-    } catch (err: any) {
-      console.error('Error:', err)
-      setErrorMsg('Lỗi: ' + err.message)
-      toast.error('Có lỗi xảy ra, vui lòng thử lại')
-    } finally {
-      setSubmitting(false)
-    }
+    console.log('Insert success:', data)
+    setSubmitted(true)
+    toast.success('Enquiry đã được gửi thành công!')
+    
+    setTitle('')
+    setDescription('')
+    setRelatedEnquiry('')
+    
+    setTimeout(() => {
+      router.push('/dashboard/student')
+    }, 2000)
+    
+  } catch (err: any) {
+    console.error('Error:', err)
+    setErrorMsg('Lỗi: ' + err.message)
+    toast.error('Có lỗi xảy ra, vui lòng thử lại')
+  } finally {
+    setSubmitting(false)
   }
+}
 
   if (loading) {
     return (
