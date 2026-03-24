@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import ChatbotWidget from '@/components/ChatbotWidget'
 import Sidebar from '@/components/layout/Sidebar'
 import { theme } from '@/lib/theme'
 import { 
@@ -31,6 +32,8 @@ export default function SearchPage() {
   const [category, setCategory] = useState('Tất cả danh mục')
   const [timeframe, setTimeframe] = useState('Tất cả thời gian')
   const [onlyDocuments, setOnlyDocuments] = useState(false)
+  const [aiAnswer, setAiAnswer] = useState<{ answer: string; sources: any[] } | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,8 +59,32 @@ export default function SearchPage() {
     fetchData()
   }, [supabase, router])
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setAiAnswer(null)
+      return
+    }
+    
     console.log('Searching:', searchQuery, category, timeframe, onlyDocuments)
+    
+    // Call AI search endpoint
+    setAiLoading(true)
+    try {
+      const response = await fetch('/api/ai/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAiAnswer(data)
+      }
+    } catch (error) {
+      console.error('AI search error:', error)
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   if (loading) {
@@ -224,6 +251,46 @@ export default function SearchPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Left: Article List */}
               <div className="lg:col-span-8 space-y-6">
+                {/* AI Answer Box */}
+                {aiAnswer && (
+                  <div className="bg-[#FEB21A]/10 border-2 border-[#FEB21A] p-6 rounded-2xl">
+                    <div className="flex gap-4 mb-4">
+                      <div className="text-2xl">🤖</div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-[#020035] mb-2">AI-Generated Answer</h3>
+                        <p className="text-sm text-[#47464F] leading-relaxed mb-4">{aiAnswer.answer}</p>
+                        
+                        {/* Sources */}
+                        {aiAnswer.sources && aiAnswer.sources.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-[#FEB21A]/30">
+                            <p className="text-xs font-bold text-[#47464F] uppercase tracking-wider mb-2">Sources</p>
+                            <div className="space-y-2">
+                              {aiAnswer.sources.map((source: any, idx: number) => (
+                                <Link
+                                  key={idx}
+                                  href={`/enquiry/${source.id}`}
+                                  className="text-xs font-semibold text-[#020035] hover:text-[#FEB21A] transition-colors flex items-center gap-2"
+                                >
+                                  <span>📄</span>
+                                  <span>{source.title}</span>
+                                  <span className="text-[#FEB21A]">→</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {aiLoading && (
+                  <div className="bg-gray-50 border-2 border-gray-200 p-6 rounded-2xl flex items-center gap-3">
+                    <div className="w-5 h-5 border-2 border-[#FEB21A] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-sm font-semibold text-gray-600">Searching knowledge base...</p>
+                  </div>
+                )}
+                
                 <div className="flex justify-between items-center pb-2">
                   <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[2px]">Showing 24 Results</h3>
                   <div className="flex items-center gap-1 text-[11px] font-bold text-slate-400 cursor-pointer">
@@ -297,23 +364,7 @@ export default function SearchPage() {
           </div>
         </div>
 
-        {/* AI Assistant Bottom Bar */}
-        <div className="p-10 pt-0">
-          <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-lg flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#0A0521] rounded-xl flex items-center justify-center">
-                <MessageSquare className="text-[#FEB21A]" size={24} />
-              </div>
-              <div>
-                <p className="font-bold text-slate-800">Need immediate help?</p>
-                <p className="text-xs text-slate-500">Our AI assistant can answer complex queries about university policies instantly.</p>
-              </div>
-            </div>
-            <button className="bg-[#0A0521] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-800 transition-all">
-              Chat with AI <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
+        <ChatbotWidget />
       </main>
     </div>
   )

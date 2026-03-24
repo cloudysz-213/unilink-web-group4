@@ -1,311 +1,352 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import Sidebar from '@/components/layout/Sidebar'
+import Header from '@/components/layout/Header'
+import ChatbotWidget from '@/components/ChatbotWidget'
+import { theme } from '@/lib/theme'
 
 export default function ManagerDashboard() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [user, setUser] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [aiInsights, setAiInsights] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
+      
+      setUser(currentUser)
+      
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single()
+      
+      if (profile?.role !== 'manager' && profile?.role !== 'admin_officer') {
+        router.push('/dashboard/student')
+        return
+      }
+      
+      setUserProfile(profile)
+      setLoading(false)
+
+      // Fetch AI insights
+      try {
+        const response = await fetch('/api/ai/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ period: '30' })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setAiInsights(data)
+        }
+      } catch (error) {
+        console.error('AI insights error:', error)
+      }
+    }
+    
+    fetchData()
+  }, [supabase, router])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: theme.colors.primary }}>
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
+
+  const role = userProfile?.role || 'manager'
+
   return (
-    <div className="flex min-h-screen bg-surface">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-primary text-white z-40 flex flex-col hidden md:flex">
-        <div className="px-8 py-10">
-          <div className="text-xl font-black tracking-tighter">UniLink</div>
-        </div>
-        <div className="px-6 mb-8">
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
-            <div className="h-10 w-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-              👨‍💼
-            </div>
-            <div className="overflow-hidden">
-              <div className="text-white font-bold text-sm truncate">Dr. Julian Vance</div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wider truncate">Head of Analytics</div>
-            </div>
-          </div>
-        </div>
-        <nav className="flex-1 px-4 space-y-1">
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium">
-            📊 Dashboard
-          </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-l-4 border-l-[#FEB21A] text-[#FEB21A] rounded-lg text-sm font-medium">
-            📈 Analytics
-          </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium">
-            📄 Reports
-          </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium">
-            💬 Enquiries
-          </Link>
-          <div className="pt-8 pb-2 px-4 text-[10px] font-bold uppercase tracking-widest text-white/40">Management</div>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium">
-            ⚙️ Settings
-          </Link>
-          <Link href="#" className="flex items-center gap-3 px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all rounded-lg text-sm font-medium">
-            ❓ Support
-          </Link>
-        </nav>
-        <div className="p-6 border-t border-white/10">
-          <Link href="/login" className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 transition-all text-sm font-medium rounded-lg">
-            🚪 Logout
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="md:ml-64 flex-1">
-        {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex justify-between items-center px-6 md:px-8 sticky top-0 z-40">
-          <div className="relative w-96 hidden md:block">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
-            <input className="w-full bg-slate-50 border border-slate-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:ring-1 focus:ring-[#FEB21A] focus:border-[#FEB21A] outline-none" placeholder="Search analytics..."/>
-          </div>
-          <div className="flex items-center gap-6">
-            <button className="relative text-slate-400 hover:text-primary transition-colors">
-              🔔
-            </button>
-            <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-primary">Dr. Julian Vance</p>
-                <p className="text-[10px] text-slate-500 font-medium">Head of Analytics</p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
-                👨‍💼
-              </div>
+    <div className="flex min-h-screen bg-[#f5f6f8]">
+      {/* Sidebar - Đảm bảo component Sidebar của bạn có width cố định là 64 (16rem) */}
+      <Sidebar user={user} userProfile={userProfile} role={role} />
+      
+      {/* FIX 1: Thêm ml-64 để đẩy toàn bộ content sang phải, tránh bị Sidebar đè.
+          FIX 2: Thêm flex-1 để chiếm trọn chiều rộng còn lại.
+      */}
+      <main className="flex-1 ml-64 min-h-screen flex flex-col overflow-x-hidden">
+        <Header title="Manager Dashboard" subtitle="Analytics & Oversight" user={user} userProfile={userProfile} />
+        
+        {/* FIX 3: p-10 (padding) để nội dung không sát mép.
+            FIX 4: Thêm pt-12 (padding top) để tạo khoảng cách an toàn với Header.
+        */}
+        <div className="flex-1 p-10 pt-12 max-w-7xl mx-auto w-full">
+          
+          {/* Dashboard Header - Tăng mb-12 để thoáng hơn */}
+          <div className="text-center mb-16">
+            <nav className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">
+              <span>Admin</span>
+              <span className="text-lg">›</span>
+              <span className="text-[#FEB21A]">Insights</span>
+            </nav>
+            <h1 className="text-4xl font-headline font-black text-[#020035] tracking-tight">Service Performance Insights</h1>
+            <p className="text-gray-500 text-sm mt-2 font-medium">Real-time operational metrics for UniLink Curator</p>
+            <div className="mt-8 flex justify-center gap-4">
+              <button className="flex items-center gap-2 bg-white text-[#020035] px-6 py-2.5 rounded-xl font-bold text-sm shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <span className="material-symbols-outlined text-xl">filter_list</span>
+                Filter View
+              </button>
+              <button className="flex items-center gap-2 bg-[#FEB21A] text-[#020035] px-6 py-2.5 rounded-xl font-black text-sm shadow-xl shadow-[#FEB21A]/25 hover:-translate-y-0.5 transition-all">
+                <span className="material-symbols-outlined text-xl">analytics</span>
+                Generate Audit
+              </button>
             </div>
           </div>
-        </header>
 
-        <main className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-          {/* Dashboard Header */}
-          <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-            <div>
-              <nav className="flex text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 gap-2">
-                <a href="#" className="hover:text-primary">Admin</a>
-                <span>/</span>
-                <a href="#" className="text-primary">Insights</a>
-              </nav>
-              <h1 className="text-3xl font-extrabold tracking-tight text-primary">Service Performance Insights</h1>
-              <p className="text-on-surface-variant text-sm mt-1">Real-time operational metrics for UniLink Curator</p>
+          {/* KPI Grid - Giữ nguyên logic UI của bạn, tăng gap-8 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-[#020035]/5 rounded-xl flex items-center justify-center text-[#020035]">
+                  <span className="material-symbols-outlined text-2xl">calendar_today</span>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
+              </div>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Total Appointments</p>
+              <h4 className="text-3xl font-extrabold text-[#020035]">1,284</h4>
             </div>
-            <button className="bg-[#FEB21A] text-on-secondary px-6 py-3 rounded font-extrabold text-sm flex items-center gap-2 shadow-lg shadow-[#FEB21A]/20 hover:scale-[1.02] transition-transform">
-              📥 Export Monthly Report
-            </button>
-          </header>
 
-          {/* KPI Grid */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-slate-50 rounded-lg text-primary">💬</div>
-                <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded">+5.2%</span>
+                <div className="w-12 h-12 bg-[#020035]/5 rounded-xl flex items-center justify-center text-[#020035]">
+                  <span className="material-symbols-outlined text-2xl">percent</span>
+                </div>
+                <span className="text-[11px] font-bold text-[#020035] bg-[#FEB21A]/10 px-2 py-1 rounded-full border border-[#FEB21A]/20">Target Met</span>
               </div>
-              <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Enquiries</h3>
-              <p className="text-2xl font-extrabold text-primary">12,450</p>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Staff Utilization</p>
+              <h4 className="text-3xl font-extrabold text-[#020035]">87.4%</h4>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-slate-50 rounded-lg text-primary">⏱️</div>
-                <span className="text-primary text-[10px] font-bold bg-slate-100 px-2 py-1 rounded">Target 24h</span>
-              </div>
-              <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Avg. Resolution</h3>
-              <p className="text-2xl font-extrabold text-primary">18.5 hrs</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-slate-50 rounded-lg text-primary">⚠️</div>
-                <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded">Normal</span>
-              </div>
-              <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Escalation Rate</h3>
-              <p className="text-2xl font-extrabold text-primary">3.2%</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-slate-50 rounded-lg text-primary">⭐</div>
-                <div className="flex text-[#FEB21A]">★★★★☆</div>
-              </div>
-              <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">CSAT Score</h3>
-              <p className="text-2xl font-extrabold text-primary">4.8/5.0</p>
-            </div>
-          </section>
 
-          {/* Charts Grid */}
-          <section className="grid grid-cols-12 gap-6 mb-10">
-            {/* Monthly Trends Chart */}
-            <div className="col-span-12 lg:col-span-8 bg-white p-8 rounded-lg shadow-sm border border-slate-100">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-[#020035]/5 rounded-xl flex items-center justify-center text-[#020035]">
+                  <span className="material-symbols-outlined text-2xl">stars</span>
+                </div>
+                <span className="text-[11px] font-bold text-white bg-[#020035] px-2 py-1 rounded-full">Top Performer</span>
+              </div>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Top Busy SSO</p>
+              <h4 className="text-xl font-bold text-[#020035] truncate">Dr. Arts Thorne</h4>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-[#020035]/5 rounded-xl flex items-center justify-center text-[#020035]">
+                  <span className="material-symbols-outlined text-2xl">warning</span>
+                </div>
+                <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-full">-2.1%</span>
+              </div>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">No-Show Rate</p>
+              <h4 className="text-3xl font-extrabold text-[#020035]">4.2%</h4>
+            </div>
+          </div>
+
+          {/* AI Insights Card */}
+          {aiInsights && (
+            <div className="bg-gradient-to-br from-[#FEB21A]/20 to-[#FEB21A]/5 border-2 border-[#FEB21A] p-8 rounded-2xl shadow-sm mb-16">
+              <div className="flex gap-6 items-start">
+                <div className="text-5xl">🤖</div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-[#020035] mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[#FEB21A] rounded-full"></span>
+                    AI-Generated Insights
+                  </h3>
+                  <p className="text-[#47464F] leading-relaxed mb-6 text-base">{aiInsights.summary}</p>
+                  
+                  {/* Trends */}
+                  {aiInsights.trends && aiInsights.trends.length > 0 && (
+                    <div className="mb-6 p-4 bg-white/50 rounded-xl">
+                      <p className="text-xs font-bold text-[#47464F] uppercase tracking-wider mb-3">Key Trends</p>
+                      <div className="space-y-2">
+                        {aiInsights.trends.map((trend: string, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2 text-sm text-[#020035]">
+                            <span className="text-lg">📈</span>
+                            {trend}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Key Metrics */}
+                  {aiInsights.metrics && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {aiInsights.metrics.total_enquiries !== undefined && (
+                        <div className="bg-white px-3 py-2 rounded-lg">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Enquiries</p>
+                          <p className="text-xl font-bold text-[#020035]">{aiInsights.metrics.total_enquiries}</p>
+                        </div>
+                      )}
+                      {aiInsights.metrics.resolved_rate_percent !== undefined && (
+                        <div className="bg-white px-3 py-2 rounded-lg">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Resolved Rate</p>
+                          <p className="text-xl font-bold text-green-600">{aiInsights.metrics.resolved_rate_percent.toFixed(1)}%</p>
+                        </div>
+                      )}
+                      {aiInsights.metrics.average_rating !== 'N/A' && (
+                        <div className="bg-white px-3 py-2 rounded-lg">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Avg Rating</p>
+                          <p className="text-xl font-bold text-[#FEB21A]">{aiInsights.metrics.average_rating}/5</p>
+                        </div>
+                      )}
+                      {aiInsights.metrics.rated_enquiries !== undefined && (
+                        <div className="bg-white px-3 py-2 rounded-lg">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Rated Responses</p>
+                          <p className="text-xl font-bold text-[#020035]">{aiInsights.metrics.rated_enquiries}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Charts Grid - Tăng gap-8 và mb-16 */}
+          <div className="grid grid-cols-12 gap-8 mb-16">
+            <div className="col-span-12 lg:col-span-7 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-lg font-bold text-primary">Monthly Performance Trends</h3>
-                <div className="flex gap-6 text-[10px] font-bold uppercase tracking-wider">
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm bg-[#FEB21A]"></span> Submitted</div>
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm bg-green-600"></span> Resolved</div>
+                <div>
+                  <h5 className="text-lg font-bold text-[#020035]">Appointments per Department</h5>
+                  <p className="text-xs text-gray-500 mt-1">Monthly distribution across faculties</p>
                 </div>
+                <button className="text-gray-400 hover:text-[#020035] transition-all">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
               </div>
-              <div className="h-64 flex items-end justify-between gap-4 px-2 relative">
-                {/* Grid Background */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 pt-4 opacity-10">
-                  <div className="w-full h-px bg-primary"></div>
-                  <div className="w-full h-px bg-primary"></div>
-                  <div className="w-full h-px bg-primary"></div>
-                </div>
-                {/* Bars */}
-                {[60, 75, 85, 92, 78, 88].map((height, i) => (
-                  <div key={i} className="flex-1 flex items-end gap-1.5 h-full relative z-10">
-                    <div className="flex-1 bg-[#FEB21A] rounded-t-sm" style={{ height: `${height}%` }}></div>
-                    <div className="flex-1 bg-green-600 rounded-t-sm" style={{ height: `${height * 0.8}%` }}></div>
+              <div className="flex items-end justify-between h-64 gap-6 px-2">
+                {[
+                  { name: 'STEM', height: 85, color: '#020035' },
+                  { name: 'ARTS', height: 65, color: '#020035' },
+                  { name: 'LAW', height: 45, color: '#FEB21A' },
+                  { name: 'MED', height: 55, color: '#020035' },
+                  { name: 'ECON', height: 40, color: '#020035' }
+                ].map((item, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-gray-50 rounded-t-xl h-48 flex flex-col justify-end overflow-hidden">
+                      <div className="rounded-t-xl transition-all duration-500" style={{ height: `${item.height}%`, backgroundColor: item.color }}></div>
+                    </div>
+                    <span className="mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-wide">{item.name}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between mt-6 text-[10px] font-bold text-slate-400 px-2 uppercase tracking-widest">
-                <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
-              </div>
             </div>
 
-            {/* Status Distribution Pie */}
-            <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-lg shadow-sm border border-slate-100 flex flex-col">
-              <h3 className="text-lg font-bold text-primary mb-8">Status Distribution</h3>
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="w-40 h-40 relative mb-8 flex items-center justify-center">
-                  <div className="text-center">
-                    <span className="text-3xl font-extrabold text-primary block">12.4k</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Total</span>
+            <div className="col-span-12 lg:col-span-5 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+              <h5 className="text-lg font-bold text-[#020035] mb-2">Slot Distribution</h5>
+              <p className="text-xs text-gray-500 mb-8">Confirmed vs. Cancelled capacity</p>
+              <div className="flex flex-col items-center">
+                <div className="relative w-48 h-48">
+                  <svg className="w-full h-full -rotate-90">
+                    <circle cx="96" cy="96" r="80" fill="transparent" stroke="#f1f5f9" strokeWidth="20" />
+                    <circle cx="96" cy="96" r="80" fill="transparent" stroke="#FEB21A" strokeWidth="20" strokeDasharray="502" strokeDashoffset="140" strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-bold text-[#020035]">72%</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Confirmed</span>
                   </div>
                 </div>
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2.5 h-2.5 rounded-full bg-green-600"></span>
-                      <span className="text-xs font-semibold text-slate-600">Resolved</span>
+                <div className="grid grid-cols-2 gap-4 mt-8 w-full">
+                  <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#FEB21A]"></div>
+                      <span className="text-[9px] font-bold text-gray-500 uppercase">Confirmed</span>
                     </div>
-                    <span className="text-xs font-bold text-primary">65%</span>
+                    <span className="text-xl font-bold text-[#020035]">924</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#FEB21A]"></span>
-                      <span className="text-xs font-semibold text-slate-600">Assigned</span>
+                  <div className="bg-gray-50 p-4 rounded-xl text-center border border-gray-100">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+                      <span className="text-[9px] font-bold text-gray-500 uppercase">Cancelled</span>
                     </div>
-                    <span className="text-xs font-bold text-primary">20%</span>
+                    <span className="text-xl font-bold text-[#020035]">360</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span>
-                      <span className="text-xs font-semibold text-slate-600">Escalated</span>
-                    </div>
-                    <span className="text-xs font-bold text-primary">15%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Categories */}
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-primary mb-8">Enquiries by Category</h3>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-bold uppercase text-slate-500">
-                  <span>Academic</span>
-                  <span>45%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                  <div className="h-full bg-primary rounded-full" style={{ width: '45%' }}></div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-bold uppercase text-slate-500">
-                  <span>Financial</span>
-                  <span>25%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                  <div className="h-full bg-[#FEB21A] rounded-full" style={{ width: '25%' }}></div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-bold uppercase text-slate-500">
-                  <span>Visa & Migration</span>
-                  <span>18%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: '18%' }}></div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-bold uppercase text-slate-500">
-                  <span>Welfare</span>
-                  <span>12%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                  <div className="h-full bg-purple-600 rounded-full" style={{ width: '12%' }}></div>
                 </div>
               </div>
             </div>
           </div>
-        </main>
+
+          {/* Tables Section - Tăng khoảng cách mb-16 */}
+          <div className="space-y-8 mb-16">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 className="text-lg font-bold text-[#020035]">Top Performing Staff</h3>
+                <button className="text-[10px] font-bold text-[#020035] hover:underline uppercase tracking-wider">Full Rankings</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50/80 text-[10px] font-bold text-gray-500 uppercase">
+                    <tr><th className="px-8 py-4">Staff</th><th className="px-8 py-4">Resolution</th><th className="px-8 py-4">Tickets</th><th className="px-8 py-4 text-right">CSAT</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 text-sm">
+                    {/* Hàng dữ liệu giữ nguyên style của bạn */}
+                    <tr className="hover:bg-gray-50 transition-colors">
+                      <td className="px-8 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-[#020035] text-white flex items-center justify-center text-xs font-bold">EW</div>
+                          <div><p className="font-bold text-[#020035]">Elena Wells</p><p className="text-[10px] text-gray-400">Academic Affairs</p></div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-4 font-medium">4.2 hrs</td>
+                      <td className="px-8 py-4 font-medium">1,142</td>
+                      <td className="px-8 py-4 text-right"><span className="px-2.5 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-lg">4.9/5</span></td>
+                    </tr>
+                    {/* Thêm các hàng khác tương tự... */}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4 bg-gray-50/50">
+                <h3 className="text-lg font-bold text-[#020035]">Recent Escalated Enquiries</h3>
+                <div className="flex gap-3">
+                  <button className="bg-white border border-gray-200 text-[#020035] px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all">Generate Report</button>
+                  <button className="bg-[#020035] text-white px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-all">Process All</button>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50/80 text-[10px] font-bold text-gray-500 uppercase">
+                    <tr><th className="px-8 py-4">ID</th><th className="px-8 py-4">Student</th><th className="px-8 py-4">Category</th><th className="px-8 py-4">Description</th><th className="px-8 py-4">Elapsed</th><th className="px-8 py-4 text-right">Action</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    <tr className="hover:bg-gray-50 transition-colors">
+                      <td className="px-8 py-5 font-mono text-xs font-bold text-[#020035]">#ENQ-8821</td>
+                      <td className="px-8 py-5"><div><p className="font-bold text-[#020035]">Sarah Mitchell</p><p className="text-[10px] text-gray-400">s.mitchell@uni.edu</p></div></td>
+                      <td className="px-8 py-5"><span className="px-2 py-1 bg-blue-50 text-blue-600 text-[9px] font-bold rounded-lg">Financial</span></td>
+                      <td className="px-8 py-5 text-sm text-gray-600">Scholarship Disbursement Delay</td>
+                      <td className="px-8 py-5"><span className="text-red-500 text-xs font-bold">5 Days</span></td>
+                      <td className="px-8 py-5 text-right"><button className="px-4 py-2 border border-[#020035] text-[#020035] text-[10px] font-bold rounded-xl hover:bg-[#020035] hover:text-white transition-all">Review</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <footer className="mt-16 py-8 border-t border-gray-200 text-center text-[11px] text-gray-400">
+            <p>© 2026 ABC University Curator. All rights reserved. Data shown is anonymized and complies with privacy policy.</p>
+          </footer>
+        </div>
       </main>
+
+      {/* Floating Action */}
+      <ChatbotWidget />
     </div>
-  )
-}
-  }, [supabase, router])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    toast.success('Logged out successfully')
-    router.push('/')
-  }
-
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
-  }
-
-  return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">U</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">UniLink</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">{user?.email}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Manager Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Escalated Enquiries</h3>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Avg. Resolution Rate</h3>
-            <p className="text-3xl font-bold text-gray-900">--</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Pending Reviews</h3>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Manager Actions</h2>
-            <div className="flex gap-4 flex-wrap">
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                View Analytics
-              </Button>
-              <Button variant="outline">Escalated Queue</Button>
-              <Button variant="outline">Generate Reports</Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </main>
   )
 }

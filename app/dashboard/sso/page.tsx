@@ -1,253 +1,248 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import Sidebar from '@/components/layout/Sidebar'
+import Header from '@/components/layout/Header'
+import ChatbotWidget from '@/components/ChatbotWidget'
+import { theme } from '@/lib/theme'
 
 export default function SSODashboard() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [user, setUser] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      
+      if (!currentUser) {
+        router.push('/login')
+        return
+      }
+      
+      setUser(currentUser)
+      
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single()
+      
+      // Kiểm tra role - nếu không phải sso thì redirect
+      if (profile?.role !== 'sso' && profile?.role !== 'admin_officer') {
+        router.push('/dashboard/student')
+        return
+      }
+      
+      setUserProfile(profile)
+      setLoading(false)
+    }
+    
+    fetchData()
+  }, [supabase, router])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: theme.colors.primary }}>
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
+
+  const role = userProfile?.role || 'sso'
+
+  // Dữ liệu mẫu
+  const enquiries = [
+    { id: 'ENQ-8821', student: 'Sarah Mitchell', studentId: '23070983', title: 'Scholarship Disbursement Delay', category: 'Financial', priority: 'Urgent', status: 'Assigned', assigned: 'Oct 24, 2024', sla: 'Due in 4h', lastUpdate: '15m ago' },
+    { id: 'ENQ-8845', student: 'James Aris', studentId: '21094821', title: 'Visa Extension for PhD Program', category: 'International', priority: 'High', status: 'Assigned', assigned: 'Oct 23, 2024', sla: '12h left', lastUpdate: '1h ago' },
+    { id: 'ENQ-8910', student: 'Li Wei', studentId: '24001298', title: 'Mental Health Support Referral', category: 'Welfare', priority: 'Urgent', status: 'Assigned', assigned: 'Oct 24, 2024', sla: 'Due in 2h', lastUpdate: '2h ago' },
+    { id: 'ENQ-8952', student: 'Elena Rodriguez', studentId: '22088312', title: 'Incomplete Grade Appeal (BMAN300)', category: 'Academic', priority: 'Medium', status: 'Assigned', assigned: 'Oct 21, 2024', sla: 'SLA Met', lastUpdate: '4h ago' },
+    { id: 'ENQ-9011', student: 'Marcus Thorne', studentId: '23114556', title: 'Graduation Gown sizing issue', category: 'Other', priority: 'Low', status: 'Assigned', assigned: 'Oct 25, 2024', sla: '2d left', lastUpdate: '1d ago' },
+  ]
+
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-[#020035] text-white flex flex-col z-40 hidden md:flex">
-        <div className="px-6 py-8 flex items-center gap-3">
-          <div className="h-10 w-10 bg-[#FEB21A] rounded flex items-center justify-center">
-            🎓
-          </div>
-          <div>
-            <h2 className="text-lg font-black leading-none">Admin Portal</h2>
-            <p className="text-[10px] text-white/60 mt-1 uppercase tracking-wider font-bold">Staff Dashboard</p>
-          </div>
-        </div>
-        <nav className="flex-1 px-2 space-y-1">
-          <Link href="#" className="text-white/70 hover:text-white hover:bg-white/5 rounded-r-lg flex items-center gap-3 px-4 py-3 cursor-pointer transition-all">
-            📊 Dashboard
-          </Link>
-          <Link href="#" className="bg-[#FEB21A] text-primary rounded-r-lg flex items-center gap-3 px-4 py-3 cursor-pointer transition-all font-semibold">
-            📋 Assigned Enquiries
-          </Link>
-          <Link href="#" className="text-white/70 hover:text-white hover:bg-white/5 rounded-r-lg flex items-center gap-3 px-4 py-3 cursor-pointer transition-all">
-            📅 Appointments
-          </Link>
-          <Link href="#" className="text-white/70 hover:text-white hover:bg-white/5 rounded-r-lg flex items-center gap-3 px-4 py-3 cursor-pointer transition-all">
-            👤 Profile
-          </Link>
-        </nav>
-        <div className="mt-auto p-4 border-t border-white/10 space-y-1">
-          <Link href="#" className="text-white/70 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-3 px-4 py-3 transition-all">
-            ⚙️ Settings
-          </Link>
-          <Link href="/login" className="text-red-400 hover:text-red-300 hover:bg-white/5 rounded-lg flex items-center gap-3 px-4 py-3 transition-all">
-            🚪 Logout
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="md:ml-64 flex-1">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 w-full bg-white/60 backdrop-blur-md border-b border-gray-100">
-          <div className="flex justify-between items-center px-6 md:px-12 py-4">
-            <div className="flex items-center gap-4">
-              <span className="md:hidden cursor-pointer">☰</span>
-              <h2 className="font-headline text-xl font-extrabold text-[#020035]">Assigned Complex Enquiries</h2>
-            </div>
-            <div className="flex items-center gap-6">
-              <input className="hidden sm:block pl-10 pr-4 py-1.5 bg-gray-50 border border-gray-200 text-sm rounded-lg focus:ring-2 focus:ring-[#FEB21A] outline-none w-64" placeholder="Global search..."/>
-              <button className="relative">🔔</button>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-6 md:p-8">
+    <div className="min-h-screen bg-[#f9f9f9]">
+      <Sidebar user={user} userProfile={userProfile} role={role} />
+      
+      <main className="ml-64 min-h-screen">
+        <Header title="SSO Dashboard" subtitle="Assigned Enquiries" user={user} userProfile={userProfile} />
+        
+        <div className="pt-28 pb-12 px-8">
           {/* Stats Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-[#020035] text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+            {/* My Assigned Open */}
+            <div className="bg-[#020035] text-white p-6 rounded-xl shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -bottom-4 opacity-10 transition-transform group-hover:scale-110">
+                <span className="material-symbols-outlined text-8xl">pending_actions</span>
+              </div>
               <p className="text-[#FEB21A] text-xs font-bold uppercase tracking-widest mb-1">My Assigned Open</p>
-              <h3 className="text-4xl font-extrabold font-headline mb-3">24</h3>
-              <div className="flex items-center gap-1 text-[10px] text-slate-300">
-                📈 12% increase from last week
+              <h3 className="text-4xl font-extrabold font-headline">24</h3>
+              <div className="mt-4 flex items-center gap-1 text-[10px] text-slate-300">
+                <span className="material-symbols-outlined text-xs">trending_up</span>
+                <span>12% increase from last week</span>
               </div>
             </div>
-
-            <div className="bg-white border border-red-200 border-l-4 p-6 rounded-xl shadow-sm">
-              <p className="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Escalated This Week</p>
-              <h3 className="text-4xl font-extrabold font-headline text-red-500 mb-3">7</h3>
-              <div className="flex items-center gap-1 text-[10px] text-red-600">
-                ⚠️ Needs immediate attention
+            {/* Escalated This Week */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-[#ba1a1a] relative overflow-hidden">
+              <p className="text-[#47464f] text-xs font-bold uppercase tracking-widest mb-1">Escalated This Week</p>
+              <h3 className="text-4xl font-extrabold font-headline text-[#ba1a1a]">7</h3>
+              <div className="mt-4 flex items-center gap-1 text-[10px] text-[#ba1a1a]">
+                <span className="material-symbols-outlined text-xs">warning</span>
+                <span>Needs immediate attention</span>
+                <span className="ml-2 font-bold">↑ 5% vs last week</span>
               </div>
             </div>
-
-            <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-              <p className="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Avg. Resolution Time</p>
-              <h3 className="text-4xl font-extrabold font-headline text-[#020035] mb-3">18.5h</h3>
-              <div className="flex items-center gap-1 text-[10px] text-green-600">
-                ✓ Within SLA target (24h)
+            {/* Avg. Resolution Time */}
+            <div className="bg-white p-6 rounded-xl shadow-sm relative overflow-hidden">
+              <p className="text-[#47464f] text-xs font-bold uppercase tracking-widest mb-1">Avg. Resolution Time</p>
+              <h3 className="text-4xl font-extrabold font-headline text-[#020035]">18.5h</h3>
+              <div className="mt-4 flex items-center gap-1 text-[10px] text-green-600">
+                <span className="material-symbols-outlined text-xs">check_circle</span>
+                <span>Within SLA target (24h)</span>
+                <span className="ml-2 font-bold">↓ 10% improvement</span>
               </div>
             </div>
-
-            <div className="bg-red-50 border border-red-200 border-l-4 p-6 rounded-xl shadow-sm">
-              <p className="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-1">Urgent Pending</p>
-              <h3 className="text-4xl font-extrabold font-headline text-red-600 mb-3">5</h3>
-              <div className="flex items-center gap-1 text-[10px] text-red-600">
-                ⏱️ 5 overdue priority items
+            {/* Urgent Pending */}
+            <div className="bg-red-50 p-6 rounded-xl shadow-sm border-l-4 border-red-500 relative overflow-hidden">
+              <p className="text-[#47464f] text-xs font-bold uppercase tracking-widest mb-1">Urgent Pending</p>
+              <h3 className="text-4xl font-extrabold font-headline text-[#FEB21A]">5</h3>
+              <div className="mt-4 flex items-center gap-1 text-[10px] text-[#FEB21A]">
+                <span className="material-symbols-outlined text-xs">timer</span>
+                <span>5 overdue priority items</span>
+                <span className="ml-2 font-bold text-red-600">↑ 2% increase</span>
               </div>
             </div>
           </div>
 
           {/* Filters Section */}
-          <div className="bg-gray-50 p-6 rounded-xl mb-8 flex flex-col md:flex-row gap-4 items-center border border-gray-200">
+          <div className="bg-[#f3f3f4] p-6 rounded-xl mb-8 flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
-              <input className="w-full bg-white border border-gray-200 pl-12 pr-4 py-3 rounded-lg text-sm focus:ring-2 focus:ring-[#FEB21A] outline-none transition-all" placeholder="Search by student ID, title..."/>
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#777680]">search</span>
+              <input className="w-full bg-white border-none pl-12 pr-4 py-3 rounded-lg text-sm focus:ring-2 focus:ring-[#FEB21A] transition-all outline-none" placeholder="Search by student ID, title..." type="text"/>
             </div>
             <div className="flex gap-4 w-full md:w-auto">
-              <select className="bg-white border border-gray-200 rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-[#FEB21A] outline-none">
-                <option>Status</option>
+              <select className="bg-white border-none rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-[#FEB21A] min-w-[140px] outline-none">
+                <option disabled>Status</option>
                 <option>All</option>
                 <option>In Progress</option>
                 <option>Escalated</option>
                 <option>Resolved</option>
               </select>
-              <select className="bg-white border border-gray-200 rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-[#FEB21A] outline-none">
-                <option>Category</option>
+              <select className="bg-white border-none rounded-lg text-sm py-3 px-4 focus:ring-2 focus:ring-[#FEB21A] min-w-[180px] outline-none">
+                <option disabled>Category</option>
                 <option>Academic</option>
-                <option>International</option>
-                <option>Graduation</option>
+                <option>Visa & International</option>
+                <option>Graduation & Career</option>
                 <option>Welfare</option>
                 <option>Financial</option>
+                <option>Other</option>
               </select>
             </div>
           </div>
 
           {/* Table Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">ID</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">Student</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">Title</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">Category</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">Priority</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">SLA</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase text-on-surface-variant">Last Updated</th>
-                    <th className="px-6 py-4 text-right text-[11px] font-bold uppercase text-on-surface-variant">Actions</th>
+                  <tr className="bg-[#f3f3f4]/50">
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">ID</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Student</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Title</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Category</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Priority</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Assigned</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">SLA</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f]">Last Updated</th>
+                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-[#47464f] text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-5 font-semibold text-primary">#ENQ-8821</td>
-                    <td className="px-6 py-5">
-                      <div>
-                        <div className="font-bold text-on-surface">Sarah Mitchell</div>
-                        <div className="text-[10px] text-on-surface-variant">ID: 23070983</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-sm max-w-[200px] truncate">Scholarship Disbursement Delay</td>
-                    <td className="px-6 py-5">
-                      <span className="px-2.5 py-1 rounded text-[10px] font-bold border border-[#FEB21A] text-[#6b4800] bg-[#FEB21A]/5 uppercase">Financial</span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="flex items-center gap-1.5 text-red-600 font-bold text-[10px] uppercase">
-                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                        Urgent
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="text-[11px] font-bold text-red-600">Due in 4h</span>
-                    </td>
-                    <td className="px-6 py-5 text-[11px] text-on-surface-variant">15m ago</td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button className="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
-                        <button className="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
-                        <button className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all">✓</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-5 font-semibold text-primary">#ENQ-8845</td>
-                    <td className="px-6 py-5">
-                      <div>
-                        <div className="font-bold text-on-surface">James Aris</div>
-                        <div className="text-[10px] text-on-surface-variant">ID: 21094821</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5 text-sm max-w-[200px] truncate">Visa Extension for PhD Program</td>
-                    <td className="px-6 py-5">
-                      <span className="px-2.5 py-1 rounded text-[10px] font-bold border border-primary text-primary bg-primary/5 uppercase">International</span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="flex items-center gap-1.5 text-orange-600 font-bold text-[10px] uppercase">
-                        <span className="w-1.5 h-1.5 bg-orange-600 rounded-full"></span>
-                        High
-                      </span>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="text-[11px] font-bold text-on-surface-variant">12h left</span>
-                    </td>
-                    <td className="px-6 py-5 text-[11px] text-on-surface-variant">1h ago</td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button className="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
-                        <button className="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
-                        <button className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all">✓</button>
-                      </div>
-                    </td>
-                  </tr>
+                <tbody className="divide-y divide-[#eeeeee]">
+                  {enquiries.map((enq, idx) => (
+                    <tr key={idx} className="hover:bg-[#020035]/5 transition-colors group">
+                      <td className="px-6 py-5 text-sm font-semibold text-[#020035]">#{enq.id}</td>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-[#1a1c1c]">{enq.student}</span>
+                          <span className="text-[10px] text-[#47464f]">ID: {enq.studentId}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-sm max-w-[200px] truncate">{enq.title}</td>
+                      <td className="px-6 py-5">
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-bold border uppercase ${
+                          enq.category === 'Financial' ? 'border-[#FEB21A] text-[#FEB21A] bg-[#FEB21A]/5' :
+                          enq.category === 'International' ? 'border-[#020035] text-[#020035] bg-[#020035]/5' :
+                          enq.category === 'Welfare' ? 'border-green-600 text-green-700 bg-green-50' :
+                          'border-blue-600 text-blue-700 bg-blue-50'
+                        }`}>
+                          {enq.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className={`flex items-center gap-1.5 font-bold text-[10px] uppercase ${
+                          enq.priority === 'Urgent' ? 'text-[#ba1a1a]' :
+                          enq.priority === 'High' ? 'text-[#FEB21A]' : 'text-[#47464f]'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            enq.priority === 'Urgent' ? 'bg-[#ba1a1a]' :
+                            enq.priority === 'High' ? 'bg-[#FEB21A]' : 'bg-[#47464f]'
+                          }`}></span>
+                          {enq.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-[11px] text-[#47464f]">{enq.assigned}</td>
+                      <td className="px-6 py-5">
+                        <span className={`text-[11px] font-bold ${
+                          enq.sla.includes('Due') ? 'text-[#ba1a1a]' :
+                          enq.sla === 'SLA Met' ? 'text-green-600' : 'text-[#47464f]'
+                        }`}>
+                          {enq.sla}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-[11px] text-[#47464f]">{enq.lastUpdate}</td>
+                      <td className="px-6 py-5 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button className="px-3 py-1.5 bg-[#FEB21A] text-[#020035] text-[10px] font-bold rounded uppercase hover:brightness-95 transition-all">Respond</button>
+                          <button className="px-3 py-1.5 bg-orange-500 text-white text-[10px] font-bold rounded uppercase hover:bg-orange-600 transition-all">Escalate</button>
+                          <button className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all">
+                            <span className="material-symbols-outlined text-sm">check</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
+            <div className="px-6 py-4 bg-[#f3f3f4]/20 flex justify-between items-center text-[10px] text-[#47464f]">
+              <span>Showing 5 of 24 active enquiries</span>
+              <div className="flex items-center gap-2">
+                <button className="p-1 rounded bg-white hover:bg-[#e2e2e2] transition-colors">
+                  <span className="material-symbols-outlined text-xs">chevron_left</span>
+                </button>
+                <span className="font-bold">Page 1 of 5</span>
+                <button className="p-1 rounded bg-white hover:bg-[#e2e2e2] transition-colors">
+                  <span className="material-symbols-outlined text-xs">chevron_right</span>
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Footer */}
+          <footer className="mt-12 text-center">
+            <p className="text-[10px] text-[#47464f] uppercase tracking-widest font-medium opacity-60">
+              Data shown is anonymized and complies with ABC University privacy policy.
+            </p>
+          </footer>
         </div>
       </main>
+
+      {/* Floating Action Button */}
+      <ChatbotWidget />
     </div>
-  )
-}
-            </div>
-            <span className="text-xl font-bold text-gray-900">UniLink</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">{user?.email}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">SSO Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Assigned Enquiries</h3>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">In Progress</h3>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Resolved Today</h3>
-            <p className="text-3xl font-bold text-gray-900">0</p>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">SSO Actions</h2>
-            <div className="flex gap-4 flex-wrap">
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                View Assigned Enquiries
-              </Button>
-              <Button variant="outline">My Responses</Button>
-              <Button variant="outline">Escalate Enquiry</Button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </main>
   )
 }

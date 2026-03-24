@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useRef } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import { theme } from '@/lib/theme'
 import { toast } from 'sonner'
+import ChatbotWidget from '@/components/ChatbotWidget'
 
 export default function NewEnquiryPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -24,6 +26,21 @@ export default function NewEnquiryPage() {
   const [priority, setPriority] = useState('Thấp')
   const [description, setDescription] = useState('')
   const [relatedEnquiry, setRelatedEnquiry] = useState('')
+
+  // AI Suggestion states
+  const [aiSuggestion, setAiSuggestion] = useState<{ category: string; confidence: number } | null>(null)
+  const [aiClassification, setAiClassification] = useState<any>(null)
+  const [showClassificationBanner, setShowClassificationBanner] = useState(false)
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    // Check if there's context from chatbot escalation
+    const contextParam = searchParams.get('context')
+    if (contextParam) {
+      const decodedContext = decodeURIComponent(contextParam)
+      setDescription(decodedContext)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +63,33 @@ export default function NewEnquiryPage() {
     fetchData()
   }, [supabase, router])
 
+  // Debounced AI category suggestion
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    if (description.length > 20) {
+      debounceTimer.current = setTimeout(async () => {
+        try {
+          const response = await fetch('/api/ai/suggest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: description })
+          })
+          const data = await response.json()
+          setAiSuggestion(data)
+        } catch (error) {
+          console.error('AI suggestion error:', error)
+        }
+      }, 500)
+    }
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [description])
+
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
   if (!title || !description) {
@@ -55,7 +99,57 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   setSubmitting(true)
   setErrorMsg('')
+  setShowClassificationBanner(false)
 
+  // Call AI classify endpoint
+  try {
+    const classifyResponse = await fetch('/api/ai/classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: title,
+        description: description
+      })
+    })
+
+    if (classifyResponse.ok) {
+      const classification = await classifyResponse.json()
+      setAiClassification(classification)
+
+      // If general, show suggestion and ask for confirmation
+      if (classification.complexity === 'general') {
+        setShowClassificationBanner(true)
+        setSubmitting(false)
+        return
+      }
+
+      // If complex, auto-fill category and priority from classification
+      if (classification.complexity === 'complex') {
+        // Map API category to form category
+        const categoryReverse: { [key: string]: string } = {
+          'Academic': 'Academic (Học thuật)',
+          'Visa & International': 'Visa & International Students',
+          'Graduation & Career': 'Graduation & Career',
+          'Welfare': 'Welfare',
+          'Financial': 'Financial',
+          'Other': 'Other'
+        }
+        setCategory(categoryReverse[classification.category] || 'Other')
+        const priorityReverse: { [key: string]: string } = {
+          'high': 'Cao',
+          'medium': 'Trung bình',
+          'low': 'Thấp'
+        }
+        setPriority(priorityReverse[classification.priority] || 'Trung bình')
+        setShowClassificationBanner(true)
+      }
+    }
+  } catch (error) {
+    console.error('Classification error:', error)
+    // Continue with default submission if classification fails
+  }
+
+  // Continue with normal submission
   const priorityMap: { [key: string]: string } = {
     'Thấp': 'Low',
     'Trung bình': 'Medium',
@@ -78,9 +172,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     priority: priorityMap[priority] || 'Medium',
     status: 'open',
     student_id: user.id,
+    assigned_to: aiClassification?.assigned_to || null
   }
-
-  console.log('Inserting enquiry:', insertData) // Thêm log
 
   try {
     const { data, error } = await supabase
@@ -90,9 +183,10 @@ const handleSubmit = async (e: React.FormEvent) => {
       .single()
 
     if (error) {
-      console.error('Supabase error details:', error) // Log chi tiết
+      console.error('Supabase error details:', error)
       setErrorMsg('Lỗi: ' + error.message)
       toast.error('Gửi enquiry thất bại: ' + error.message)
+      setSubmitting(false)
       return
     }
 
@@ -103,6 +197,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     setTitle('')
     setDescription('')
     setRelatedEnquiry('')
+    setShowClassificationBanner(false)
     
     setTimeout(() => {
       router.push('/dashboard/student')
@@ -147,8 +242,39 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* LEFT COLUMN - FORM */}
             <div className="col-span-8 space-y-8">
               {!submitted ? (
-                <div className="bg-white p-10 rounded-xl shadow-sm border border-outline-variant/10">
-                  <form onSubmit={handleSubmit} className="space-y-8">
+                <>
+                  {/* AI Classification Banner */}
+                  {showClassificationBanner && aiClassification && (
+                    <div className={`p-4 rounded-xl border-l-4 flex items-start gap-4 ${
+                      aiClassification.complexity === 'complex'
+                        ? 'bg-[#FEB21A]/10 border-[#FEB21A]'
+                        : 'bg-blue-50 border-blue-400'
+                    }`}>
+                      <div className="text-2xl">{aiClassification.complexity === 'complex' ? '⚠️' : 'ℹ️'}</div>
+                      <div className="flex-1">
+                        <p className="font-bold text-[#020035] mb-2">AI Classification Result</p>
+                        <p className="text-sm text-[#47464F] mb-3">{aiClassification.suggested_response}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                            aiClassification.complexity === 'complex'
+                              ? 'bg-[#FEB21A]/30 text-[#6b4800]'
+                              : 'bg-blue-200 text-blue-800'
+                          }`}>
+                            {aiClassification.complexity === 'complex' ? 'Complex - Will be assigned to SSO' : 'General - AI can help'}
+                          </span>
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-800">
+                            Category: {aiClassification.category}
+                          </span>
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-800">
+                            Priority: {aiClassification.priority}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="bg-white p-10 rounded-xl shadow-sm border border-outline-variant/10">
+                    <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Title */}
                     <div className="space-y-2">
                       <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Tiêu đề Enquiry</label>
@@ -215,13 +341,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-end">
                         <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Mô tả chi tiết</label>
-                        <button
-                          type="button"
-                          className="text-[#6b4800] border border-[#FEB21A] px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 hover:bg-[#FEB21A]/10"
-                        >
-                          <span className="material-symbols-outlined text-sm">auto_fix</span>
-                          Gợi ý bằng AI
-                        </button>
                       </div>
                       <textarea
                         className="w-full p-6 bg-[#f3f3f4] border-0 focus:ring-2 focus:ring-[#FEB21A] rounded-xl resize-none outline-none"
@@ -231,6 +350,29 @@ const handleSubmit = async (e: React.FormEvent) => {
                         onChange={(e) => setDescription(e.target.value)}
                         required
                       />
+                      {/* AI Suggestion Badge */}
+                      {aiSuggestion && description.length > 20 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const categoryReverse: { [key: string]: string } = {
+                              'Academic': 'Academic (Học thuật)',
+                              'Visa & International': 'Visa & International Students',
+                              'Graduation & Career': 'Graduation & Career',
+                              'Welfare': 'Welfare',
+                              'Financial': 'Financial',
+                              'Other': 'Other'
+                            }
+                            setCategory(categoryReverse[aiSuggestion.category] || 'Other')
+                            toast.success(`Category updated to ${aiSuggestion.category}`)
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FEB21A]/10 border border-[#FEB21A] text-[#6b4800] text-sm font-semibold hover:bg-[#FEB21A]/20 transition-all"
+                        >
+                          <span>🤖 AI suggests:</span>
+                          <span className="font-bold">{aiSuggestion.category}</span>
+                          <span className="text-xs opacity-70">({(aiSuggestion.confidence * 100).toFixed(0)}%)</span>
+                        </button>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -267,6 +409,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
                   </form>
                 </div>
+                </>
               ) : (
                 <div className="bg-white p-16 rounded-2xl shadow-sm text-center">
                   <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -338,12 +481,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
       </main>
 
-      {/* Floating Chatbot Bubble */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <button className="w-14 h-14 bg-[#020035] text-[#FEB21A] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
-          <span className="material-symbols-outlined text-2xl">support_agent</span>
-        </button>
-      </div>
+      <ChatbotWidget />
     </div>
   )
 }

@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react'
+import ChatbotWidget from '@/components/ChatbotWidget'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle } from 'lucide-react'
 
 // Theme colors
 const theme = {
@@ -20,6 +21,7 @@ const theme = {
 
 export default function StudentDashboard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -32,10 +34,20 @@ export default function StudentDashboard() {
   })
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Lắng nghe query param refresh từ URL
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh')
+    const feedbackParam = searchParams.get('feedback')
+    if (refreshParam || feedbackParam) {
+      setRefreshKey(prev => prev + 1)
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchData = async () => {
-      // Get current user
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       
       if (!currentUser) {
@@ -45,7 +57,6 @@ export default function StudentDashboard() {
       
       setUser(currentUser)
       
-      // Get user profile
       const { data: profile } = await supabase
         .from('users')
         .select('*')
@@ -54,13 +65,13 @@ export default function StudentDashboard() {
       
       setUserProfile(profile)
       
-      // Get user's enquiries
+      // Get user's enquiries - LẤY NHIỀU HƠN ĐỂ HIỂN THỊ FEEDBACK
       const { data: enquiriesData } = await supabase
         .from('enquiries')
         .select('*')
         .eq('student_id', currentUser.id)
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limit(10)
       
       if (enquiriesData) {
         setEnquiries(enquiriesData)
@@ -84,7 +95,6 @@ export default function StudentDashboard() {
       if (aptError) {
         console.error('Error fetching appointments:', aptError)
       } else {
-        console.log('Appointments fetched:', appointmentsData)
         setAppointments(appointmentsData || [])
         setStats(prev => ({ ...prev, appointments: appointmentsData?.length || 0 }))
       }
@@ -93,9 +103,8 @@ export default function StudentDashboard() {
     }
     
     fetchData()
-  }, [supabase, router])
+  }, [supabase, router, refreshKey])
 
-  // Format date
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric', year: 'numeric' })
@@ -106,7 +115,6 @@ export default function StudentDashboard() {
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Generate calendar days
   const getDaysInMonth = (year: number, month: number) => {
     const firstDay = new Date(year, month, 1).getDay()
     const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -164,6 +172,9 @@ export default function StudentDashboard() {
   const studentId = userProfile?.student_id || 'N/A'
   const role = userProfile?.role || 'student'
 
+  // Lọc các enquiry cần feedback (status resolved và chưa có feedback_rating)
+  const needFeedback = enquiries.filter(e => e.status === 'resolved' && !e.feedback_rating)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar user={user} userProfile={userProfile} role={role} />
@@ -209,7 +220,7 @@ export default function StudentDashboard() {
                   <button className="text-sm font-semibold hover:underline" style={{ color: theme.colors.secondary }}>View All</button>
                 </div>
                 <div className="overflow-x-auto">
-                  {enquiries.length === 0 ? (
+                  {enquiries.filter(e => e.status !== 'closed').length === 0 ? (
                     <div className="p-12 text-center text-gray-400">
                       <p className="text-lg mb-2">📭</p>
                       <p>You haven't submitted any enquiries yet</p>
@@ -221,7 +232,7 @@ export default function StudentDashboard() {
                         <tr><th className="px-6 py-4">ID</th><th className="px-6 py-4">Title</th><th className="px-6 py-4">Category</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Action</th></tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {enquiries.map((enquiry, idx) => (
+                        {enquiries.filter(e => e.status !== 'closed').slice(0, 5).map((enquiry, idx) => (
                           <tr key={enquiry.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4 text-sm font-mono text-gray-500">#{enquiry.id?.slice(-6) || `ENQ-${idx + 1}`}</td>
                             <td className="px-6 py-4 text-sm font-semibold" style={{ color: theme.colors.primary }}>{enquiry.title}</td>
@@ -232,6 +243,41 @@ export default function StudentDashboard() {
                         ))}
                       </tbody>
                     </table>
+                  )}
+                </div>
+              </section>
+
+              {/* Feedback Section - ENQUIRIES CẦN FEEDBACK */}
+              <section className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+                <div className="px-6 py-5 border-b border-gray-100">
+                  <h3 className="font-bold text-lg" style={{ color: theme.colors.primary }}>Enquiries cần feedback</h3>
+                </div>
+                <div className="p-6 space-y-4">
+                  {needFeedback.length === 0 ? (
+                    <div className="text-center py-6 text-gray-400">
+                      <CheckCircle size={32} className="mx-auto mb-2 text-gray-300" />
+                      <p>Không có enquiry nào cần đánh giá</p>
+                    </div>
+                  ) : (
+                    needFeedback.map((enq, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                            <CheckCircle size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-[#020035]">#{enq.id?.slice(-6)}: {enq.title}</p>
+                            <p className="text-xs text-gray-500">Hoàn thành vào: {enq.updated_at ? new Date(enq.updated_at).toLocaleDateString('vi-VN') : 'Recently'}</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => router.push(`/enquiry/${enq.id}`)}
+                          className="flex items-center gap-1 text-[#FEB21A] text-sm font-semibold hover:underline"
+                        >
+                          Đánh giá →
+                        </button>
+                      </div>
+                    ))
                   )}
                 </div>
               </section>
@@ -328,13 +374,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Floating Chatbot Bubble */}
-        <div className="fixed bottom-8 right-8 z-[60] flex flex-col items-end gap-3">
-          <div className="hidden md:flex bg-black/60 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/40 max-w-[240px] mb-1 text-sm"><p>Need help with admission procedures or course registration?</p></div>
-          <div className="flex items-center gap-3">
-            <button className="text-white text-sm font-bold whitespace-nowrap px-6 py-3 rounded-full shadow-xl hover:scale-105 transition-all flex items-center gap-2" style={{ backgroundColor: theme.colors.primary }}><span className="text-2xl">🤖</span>Ask AI</button>
-            <div className="relative group"><button className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all text-3xl" style={{ backgroundColor: theme.colors.secondary, color: theme.colors.primary }}>💬</button><span className="absolute top-0 right-0 w-4 h-4 border-2 border-white rounded-full" style={{ backgroundColor: theme.colors.error }}></span></div>
-          </div>
-        </div>
+        <ChatbotWidget />
       </main>
     </div>
   )

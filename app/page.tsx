@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import ChatbotWidget from '@/components/ChatbotWidget'
 
 export default function Home() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
@@ -206,19 +207,7 @@ export default function Home() {
       </footer>
 
       {/* Floating Chatbot */}
-      <div className="fixed bottom-8 right-8 z-[100] group flex flex-col items-end">
-        <div className="mb-4 mr-2 bg-white px-5 py-3 rounded-2xl shadow-2xl border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none transform translate-y-2 group-hover:translate-y-0">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-bold text-[#020035]">Chat hỏi nhanh FAQ</span>
-          </div>
-          <p className="text-[10px] text-gray-500 mt-1">Không cần login để hỏi cơ bản</p>
-        </div>
-        <button className="w-16 h-16 bg-[#020035] rounded-full flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition-transform relative border-2 border-white/20">
-          🤖
-          <div className="absolute top-0 right-0 w-4 h-4 bg-[#FEB21A] border-2 border-[#020035] rounded-full"></div>
-        </button>
-      </div>
+      <ChatbotWidget />
     </main>
   )
 }

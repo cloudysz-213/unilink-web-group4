@@ -3,24 +3,61 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login
-    setTimeout(() => {
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
+
+      if (error) {
+        toast.error('Sai email hoặc mật khẩu')
+        setIsLoading(false)
+        return
+      }
+
+      // Lấy role từ bảng users
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      const role = profile?.role || 'student'
+      
+      const redirectMap: Record<string, string> = {
+        student: '/dashboard/student',
+        admin_officer: '/dashboard/admin',
+        sso: '/dashboard/sso',
+        manager: '/dashboard/manager',
+        director: '/dashboard/manager',
+      }
+
+      const redirectPath = redirectMap[role] || '/dashboard/student'
+      
+      toast.success('Đăng nhập thành công!')
+      router.push(redirectPath)
+      
+    } catch (err) {
+      toast.error('Có lỗi xảy ra, vui lòng thử lại')
+    } finally {
       setIsLoading(false)
-      // Redirect to dashboard
-      router.push('/dashboard/student/')
-    }, 1000)
+    }
   }
 
   return (
@@ -123,7 +160,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Sign Up Link */}
+            {/* Sign Up Link - ĐÃ SỬA */}
             <div className="mt-10 text-center">
               <p className="text-slate-600 text-sm font-medium">
                 Chưa có tài khoản? 
@@ -141,12 +178,8 @@ export default function LoginPage() {
               Hỗ trợ kỹ thuật: support@unilink.edu.vn
             </div>
             <div className="flex gap-4">
-              <a className="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">
-                Bảo mật
-              </a>
-              <a className="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">
-                Điều khoản
-              </a>
+              <a className="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">Bảo mật</a>
+              <a className="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">Điều khoản</a>
             </div>
           </div>
         </div>

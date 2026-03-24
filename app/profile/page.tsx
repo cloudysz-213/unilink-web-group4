@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import { theme } from '@/lib/theme'
+import ChatbotWidget from '@/components/ChatbotWidget'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -180,6 +181,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+      <ChatbotWidget />
     </div>
   )
 }

@@ -3,221 +3,125 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 export default function SignupPage() {
   const router = useRouter()
   const supabase = createClient()
-
-  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
-  const [studentId, setStudentId] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [studentId, setStudentId] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-
-    // Validation
-    if (!fullName.trim()) {
-      setError('Full name is required')
-      return
-    }
-    if (!studentId.trim()) {
-      setError('Student ID is required')
-      return
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
-      return
-    }
-
-    setLoading(true)
+    setIsLoading(true)
 
     try {
-      // Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName,
+            student_id: studentId,
+          }
+        }
       })
 
-      if (authError) {
-        setError(authError.message)
-        toast.error(authError.message)
+      if (error) {
+        toast.error(error.message)
+        setIsLoading(false)
         return
       }
 
-      if (authData.user) {
-        // Insert user data into public.users table
-        const { error: insertError } = await supabase.from('users').insert([
-          {
-            id: authData.user.id,
-            email,
+      if (data.user) {
+        await supabase
+          .from('users')
+          .upsert({
+            id: data.user.id,
+            email: email,
             full_name: fullName,
             student_id: studentId,
-            role: 'student',
-          },
-        ])
-
-        if (insertError) {
-          setError(insertError.message)
-          toast.error(insertError.message)
-          return
-        }
-
-        toast.success('Signup successful! Please check your email to confirm your account.')
-        router.push('/login')
+            role: 'student'
+          })
       }
+
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập.')
+      router.push('/login')
+      
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred'
-      setError(message)
-      toast.error(message)
+      toast.error('Có lỗi xảy ra')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">U</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">UniLink</h1>
-          <p className="text-gray-600 text-sm mt-1">Student Enquiry System</p>
+    <div className="min-h-screen bg-[#f9f9f9]">
+      <header className="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-gradient-to-r from-[#020035] to-[#151546] shadow-lg">
+        <div className="flex items-center gap-3">
+          <span className="text-[#FEB21A] text-2xl">🎓</span>
+          <span className="font-black text-white tracking-tight text-lg">UniLink</span>
         </div>
-
-        {/* Signup Card */}
-        <Card className="p-8 shadow-lg">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Create Account</h2>
-          <p className="text-sm text-gray-600 mb-6">For students of ABC University</p>
-
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSignup} className="space-y-4">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <label htmlFor="fullName" className="text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Student ID */}
-            <div className="space-y-2">
-              <label htmlFor="studentId" className="text-sm font-medium text-gray-700">
-                Student ID
-              </label>
-              <Input
-                id="studentId"
-                type="text"
-                placeholder="20240001"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <p className="text-xs text-gray-500">At least 8 characters</p>
-            </div>
-
-            {/* Confirm Password */}
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            {/* Sign Up Button */}
-            <Button
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 mt-6"
-              disabled={loading}
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </Button>
-          </form>
-
-          {/* Sign In Link */}
-          <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">Already have an account? </span>
-            <Link href="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
-              Sign in
-            </Link>
-          </div>
-        </Card>
-
-        {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>&copy; 2024 ABC University. All rights reserved.</p>
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
+          <h1 className="font-black text-white tracking-tight text-sm uppercase opacity-90">UniLink - Student Enquiry & Appointment</h1>
         </div>
-      </div>
-    </main>
+        <div className="flex items-center gap-4">
+          <button className="text-slate-300 hover:text-[#FEB21A] transition-colors text-sm font-medium">Help</button>
+          <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden text-slate-600">👤</div>
+        </div>
+      </header>
+
+      <main className="min-h-screen pt-16 flex items-center justify-center px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 transform origin-top translate-x-24 z-0"></div>
+        <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-[#FEB21A]/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 z-0"></div>
+
+        <div className="w-full max-w-md z-10">
+          <div className="bg-white p-8 md:p-10 rounded-2xl shadow-lg border border-slate-200">
+            <div className="text-center mb-8">
+              <h2 className="font-black text-3xl text-primary tracking-tight mb-2">Đăng ký</h2>
+              <p className="text-slate-600 text-sm font-medium">Tạo tài khoản UniLink mới</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-wider ml-1">Họ và tên</label>
+                <input className="w-full mt-1 px-4 py-3 border-b-2 border-slate-300 focus:border-[#FEB21A] outline-none" placeholder="Nguyễn Văn A" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-wider ml-1">Mã số sinh viên</label>
+                <input className="w-full mt-1 px-4 py-3 border-b-2 border-slate-300 focus:border-[#FEB21A] outline-none" placeholder="SV20240001" type="text" value={studentId} onChange={(e) => setStudentId(e.target.value)} required />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-wider ml-1">Email</label>
+                <input className="w-full mt-1 px-4 py-3 border-b-2 border-slate-300 focus:border-[#FEB21A] outline-none" placeholder="student@uni.edu.vn" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-wider ml-1">Mật khẩu</label>
+                <div className="relative mt-1">
+                  <input className="w-full px-4 py-3 border-b-2 border-slate-300 focus:border-[#FEB21A] outline-none pr-10" placeholder="••••••••" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" onClick={() => setShowPassword(!showPassword)}>{showPassword ? '🙈' : '👁️'}</button>
+                </div>
+              </div>
+
+              <button className="w-full bg-[#FEB21A] hover:brightness-110 text-primary font-black py-4 rounded-xl shadow-lg mt-6" type="submit" disabled={isLoading}>
+                {isLoading ? 'Đang xử lý...' : 'ĐĂNG KÝ'}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-slate-600 text-sm">Đã có tài khoản? <Link href="/login" className="text-primary font-bold border-b-2 border-[#FEB21A]">Đăng nhập</Link></p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }
