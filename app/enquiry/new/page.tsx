@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
@@ -11,7 +11,6 @@ import ChatbotWidget from '@/components/ChatbotWidget'
 
 export default function NewEnquiryPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -35,12 +34,13 @@ export default function NewEnquiryPage() {
 
   useEffect(() => {
     // Check if there's context from chatbot escalation
-    const contextParam = searchParams.get('context')
+    const params = new URLSearchParams(window.location.search)
+    const contextParam = params.get('context')
     if (contextParam) {
       const decodedContext = decodeURIComponent(contextParam)
       setDescription(decodedContext)
     }
-  }, [searchParams])
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {

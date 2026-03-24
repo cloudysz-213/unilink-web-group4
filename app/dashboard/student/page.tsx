@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
@@ -21,7 +21,6 @@ const theme = {
 
 export default function StudentDashboard() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
@@ -38,13 +37,14 @@ export default function StudentDashboard() {
 
   // Lắng nghe query param refresh từ URL
   useEffect(() => {
-    const refreshParam = searchParams.get('refresh')
-    const feedbackParam = searchParams.get('feedback')
+    const params = new URLSearchParams(window.location.search)
+    const refreshParam = params.get('refresh')
+    const feedbackParam = params.get('feedback')
     if (refreshParam || feedbackParam) {
       setRefreshKey(prev => prev + 1)
       window.history.replaceState({}, '', window.location.pathname)
     }
-  }, [searchParams])
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
