@@ -10,6 +10,11 @@ interface Message {
   escalate?: boolean
 }
 
+interface ChatbotWidgetProps {
+  isOpen?: boolean
+  setIsOpen?: (isOpen: boolean) => void
+}
+
 const theme = {
   colors: {
     primary: '#020035',
@@ -19,14 +24,18 @@ const theme = {
   }
 }
 
-export default function ChatbotWidget() {
+export default function ChatbotWidget({ isOpen: externalIsOpen, setIsOpen: externalSetIsOpen }: ChatbotWidgetProps) {
   const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [showEscalate, setShowEscalate] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Sử dụng external state nếu có, nếu không dùng internal
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const setIsOpen = externalSetIsOpen || setInternalIsOpen
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

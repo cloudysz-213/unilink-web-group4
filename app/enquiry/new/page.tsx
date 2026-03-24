@@ -18,6 +18,7 @@ export default function NewEnquiryPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false)
 
   // Form states
   const [title, setTitle] = useState('')
@@ -32,8 +33,12 @@ export default function NewEnquiryPage() {
   const [showClassificationBanner, setShowClassificationBanner] = useState(false)
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
+  // Hàm mở chatbot
+  const openChatbot = () => {
+    setIsChatbotOpen(true)
+  }
+
   useEffect(() => {
-    // Check if there's context from chatbot escalation
     const params = new URLSearchParams(window.location.search)
     const contextParam = params.get('context')
     if (contextParam) {
@@ -63,7 +68,6 @@ export default function NewEnquiryPage() {
     fetchData()
   }, [supabase, router])
 
-  // Debounced AI category suggestion
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current)
@@ -90,127 +94,120 @@ export default function NewEnquiryPage() {
     }
   }, [description])
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  if (!title || !description) {
-    toast.error('Vui lòng điền đầy đủ tiêu đề và mô tả')
-    return
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!title || !description) {
+      toast.error('Vui lòng điền đầy đủ tiêu đề và mô tả')
+      return
+    }
 
-  setSubmitting(true)
-  setErrorMsg('')
-  setShowClassificationBanner(false)
+    setSubmitting(true)
+    setErrorMsg('')
+    setShowClassificationBanner(false)
 
-  // Call AI classify endpoint
-  try {
-    const classifyResponse = await fetch('/api/ai/classify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: title,
-        description: description
+    try {
+      const classifyResponse = await fetch('/api/ai/classify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title,
+          description: description
+        })
       })
-    })
 
-    if (classifyResponse.ok) {
-      const classification = await classifyResponse.json()
-      setAiClassification(classification)
+      if (classifyResponse.ok) {
+        const classification = await classifyResponse.json()
+        setAiClassification(classification)
 
-      // If general, show suggestion and ask for confirmation
-      if (classification.complexity === 'general') {
-        setShowClassificationBanner(true)
+        if (classification.complexity === 'general') {
+          setShowClassificationBanner(true)
+          setSubmitting(false)
+          return
+        }
+
+        if (classification.complexity === 'complex') {
+          const categoryReverse: { [key: string]: string } = {
+            'Academic': 'Academic (Học thuật)',
+            'Visa & International': 'Visa & International Students',
+            'Graduation & Career': 'Graduation & Career',
+            'Welfare': 'Welfare',
+            'Financial': 'Financial',
+            'Other': 'Other'
+          }
+          setCategory(categoryReverse[classification.category] || 'Other')
+          const priorityReverse: { [key: string]: string } = {
+            'high': 'Cao',
+            'medium': 'Trung bình',
+            'low': 'Thấp'
+          }
+          setPriority(priorityReverse[classification.priority] || 'Trung bình')
+          setShowClassificationBanner(true)
+        }
+      }
+    } catch (error) {
+      console.error('Classification error:', error)
+    }
+
+    const priorityMap: { [key: string]: string } = {
+      'Thấp': 'Low',
+      'Trung bình': 'Medium',
+      'Cao': 'High'
+    }
+
+    const categoryMap: { [key: string]: string } = {
+      'Academic (Học thuật)': 'academic',
+      'Visa & International Students': 'visa_international',
+      'Graduation & Career': 'graduation_career',
+      'Welfare': 'welfare',
+      'Financial': 'financial',
+      'Other': 'other'
+    }
+
+    const insertData = {
+      title: title,
+      description: description,
+      category: categoryMap[category] || 'other',
+      priority: priorityMap[priority] || 'Medium',
+      status: 'open',
+      student_id: user.id,
+      assigned_to: aiClassification?.assigned_to || null
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('enquiries')
+        .insert(insertData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Supabase error details:', error)
+        setErrorMsg('Lỗi: ' + error.message)
+        toast.error('Gửi enquiry thất bại: ' + error.message)
         setSubmitting(false)
         return
       }
 
-      // If complex, auto-fill category and priority from classification
-      if (classification.complexity === 'complex') {
-        // Map API category to form category
-        const categoryReverse: { [key: string]: string } = {
-          'Academic': 'Academic (Học thuật)',
-          'Visa & International': 'Visa & International Students',
-          'Graduation & Career': 'Graduation & Career',
-          'Welfare': 'Welfare',
-          'Financial': 'Financial',
-          'Other': 'Other'
-        }
-        setCategory(categoryReverse[classification.category] || 'Other')
-        const priorityReverse: { [key: string]: string } = {
-          'high': 'Cao',
-          'medium': 'Trung bình',
-          'low': 'Thấp'
-        }
-        setPriority(priorityReverse[classification.priority] || 'Trung bình')
-        setShowClassificationBanner(true)
-      }
-    }
-  } catch (error) {
-    console.error('Classification error:', error)
-    // Continue with default submission if classification fails
-  }
-
-  // Continue with normal submission
-  const priorityMap: { [key: string]: string } = {
-    'Thấp': 'Low',
-    'Trung bình': 'Medium',
-    'Cao': 'High'
-  }
-
-  const categoryMap: { [key: string]: string } = {
-    'Academic (Học thuật)': 'academic',
-    'Visa & International Students': 'visa_international',
-    'Graduation & Career': 'graduation_career',
-    'Welfare': 'welfare',
-    'Financial': 'financial',
-    'Other': 'other'
-  }
-
-  const insertData = {
-    title: title,
-    description: description,
-    category: categoryMap[category] || 'other',
-    priority: priorityMap[priority] || 'Medium',
-    status: 'open',
-    student_id: user.id,
-    assigned_to: aiClassification?.assigned_to || null
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('enquiries')
-      .insert(insertData)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Supabase error details:', error)
-      setErrorMsg('Lỗi: ' + error.message)
-      toast.error('Gửi enquiry thất bại: ' + error.message)
+      setSubmitted(true)
+      toast.success('Enquiry đã được gửi thành công!')
+      
+      setTitle('')
+      setDescription('')
+      setRelatedEnquiry('')
+      setShowClassificationBanner(false)
+      
+      setTimeout(() => {
+        router.push('/dashboard/student')
+      }, 2000)
+      
+    } catch (err: any) {
+      console.error('Error:', err)
+      setErrorMsg('Lỗi: ' + err.message)
+      toast.error('Có lỗi xảy ra, vui lòng thử lại')
+    } finally {
       setSubmitting(false)
-      return
     }
-
-    console.log('Insert success:', data)
-    setSubmitted(true)
-    toast.success('Enquiry đã được gửi thành công!')
-    
-    setTitle('')
-    setDescription('')
-    setRelatedEnquiry('')
-    setShowClassificationBanner(false)
-    
-    setTimeout(() => {
-      router.push('/dashboard/student')
-    }, 2000)
-    
-  } catch (err: any) {
-    console.error('Error:', err)
-    setErrorMsg('Lỗi: ' + err.message)
-    toast.error('Có lỗi xảy ra, vui lòng thử lại')
-  } finally {
-    setSubmitting(false)
   }
-}
 
   if (loading) {
     return (
@@ -230,7 +227,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         <Header title="New Enquiry" subtitle="" user={user} userProfile={userProfile} />
 
         <div className="pt-24 px-12 pb-12 flex flex-col gap-12 max-w-7xl mx-auto w-full">
-          {/* Header Section */}
           <section className="max-w-4xl">
             <h2 className="text-5xl font-extrabold font-headline tracking-tight text-[#020035]">Nộp Enquiry Mới</h2>
             <p className="mt-4 text-[#47464F] text-lg max-w-2xl leading-relaxed">
@@ -239,11 +235,9 @@ const handleSubmit = async (e: React.FormEvent) => {
           </section>
 
           <div className="grid grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN - FORM */}
             <div className="col-span-8 space-y-8">
               {!submitted ? (
                 <>
-                  {/* AI Classification Banner */}
                   {showClassificationBanner && aiClassification && (
                     <div className={`p-4 rounded-xl border-l-4 flex items-start gap-4 ${
                       aiClassification.complexity === 'complex'
@@ -275,140 +269,138 @@ const handleSubmit = async (e: React.FormEvent) => {
                   
                   <div className="bg-white p-10 rounded-xl shadow-sm border border-outline-variant/10">
                     <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Title */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Tiêu đề Enquiry</label>
-                      <input
-                        className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 text-lg px-0 outline-none"
-                        placeholder="Nhập tiêu đề gọn thắc mắc của bạn"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8">
                       <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Lĩnh vực thắc mắc</label>
-                        <select
-                          className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 px-0 appearance-none outline-none"
-                          value={category}
-                          onChange={(e) => setCategory(e.target.value)}
-                        >
-                          <option>Academic (Học thuật)</option>
-                          <option>Visa & International Students</option>
-                          <option>Graduation & Career</option>
-                          <option>Welfare</option>
-                          <option>Financial</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Độ ưu tiên</label>
-                        <div className="flex bg-[#f3f3f4] p-1 rounded-lg gap-1">
-                          {['Thấp', 'Trung bình', 'Cao'].map(p => (
-                            <button
-                              key={p}
-                              type="button"
-                              onClick={() => setPriority(p)}
-                              className={`flex-1 py-2 text-sm font-medium rounded transition-all ${
-                                priority === p
-                                  ? 'bg-white shadow-sm text-[#020035]'
-                                  : 'text-[#47464F] hover:bg-white/50'
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Liên quan đến enquiry cũ (nếu có)</label>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[#777680] text-lg">#</span>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Tiêu đề Enquiry</label>
                         <input
-                          className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 px-0 outline-none"
-                          placeholder="VD: ENQ-9988"
-                          value={relatedEnquiry}
-                          onChange={(e) => setRelatedEnquiry(e.target.value)}
+                          className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 text-lg px-0 outline-none"
+                          placeholder="Nhập tiêu đề gọn thắc mắc của bạn"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          required
                         />
                       </div>
-                    </div>
 
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-end">
-                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Mô tả chi tiết</label>
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Lĩnh vực thắc mắc</label>
+                          <select
+                            className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 px-0 appearance-none outline-none"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                          >
+                            <option>Academic (Học thuật)</option>
+                            <option>Visa & International Students</option>
+                            <option>Graduation & Career</option>
+                            <option>Welfare</option>
+                            <option>Financial</option>
+                            <option>Other</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Độ ưu tiên</label>
+                          <div className="flex bg-[#f3f3f4] p-1 rounded-lg gap-1">
+                            {['Thấp', 'Trung bình', 'Cao'].map(p => (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setPriority(p)}
+                                className={`flex-1 py-2 text-sm font-medium rounded transition-all ${
+                                  priority === p
+                                    ? 'bg-white shadow-sm text-[#020035]'
+                                    : 'text-[#47464F] hover:bg-white/50'
+                                }`}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <textarea
-                        className="w-full p-6 bg-[#f3f3f4] border-0 focus:ring-2 focus:ring-[#FEB21A] rounded-xl resize-none outline-none"
-                        rows={6}
-                        placeholder="Mô tả cụ thể vấn đề của bạn..."
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                      {/* AI Suggestion Badge */}
-                      {aiSuggestion && description.length > 20 && (
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Liên quan đến enquiry cũ (nếu có)</label>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[#777680] text-lg">#</span>
+                          <input
+                            className="w-full bg-white border-0 border-b-2 border-outline-variant/30 focus:ring-0 focus:border-[#FEB21A] py-3 px-0 outline-none"
+                            placeholder="VD: ENQ-9988"
+                            value={relatedEnquiry}
+                            onChange={(e) => setRelatedEnquiry(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-end">
+                          <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Mô tả chi tiết</label>
+                        </div>
+                        <textarea
+                          className="w-full p-6 bg-[#f3f3f4] border-0 focus:ring-2 focus:ring-[#FEB21A] rounded-xl resize-none outline-none"
+                          rows={6}
+                          placeholder="Mô tả cụ thể vấn đề của bạn..."
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          required
+                        />
+                        {aiSuggestion && description.length > 20 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const categoryReverse: { [key: string]: string } = {
+                                'Academic': 'Academic (Học thuật)',
+                                'Visa & International': 'Visa & International Students',
+                                'Graduation & Career': 'Graduation & Career',
+                                'Welfare': 'Welfare',
+                                'Financial': 'Financial',
+                                'Other': 'Other'
+                              }
+                              setCategory(categoryReverse[aiSuggestion.category] || 'Other')
+                              toast.success(`Category updated to ${aiSuggestion.category}`)
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FEB21A]/10 border border-[#FEB21A] text-[#6b4800] text-sm font-semibold hover:bg-[#FEB21A]/20 transition-all"
+                          >
+                            <span>🤖 AI suggests:</span>
+                            <span className="font-bold">{aiSuggestion.category}</span>
+                            <span className="text-xs opacity-70">({(aiSuggestion.confidence * 100).toFixed(0)}%)</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Tài liệu đính kèm</label>
+                        <div className="border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center hover:border-[#FEB21A] bg-[#f3f3f4]/50 cursor-pointer">
+                          <span className="material-symbols-outlined text-4xl text-outline mb-3">cloud_upload</span>
+                          <p className="text-[#1a1c1c] font-semibold">Kéo và thả file hoặc click để tải lên</p>
+                          <p className="text-xs text-[#47464F] mt-1">PDF, JPG, PNG (Tối đa 10MB)</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-8 pt-6">
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="px-12 py-4 bg-[#FEB21A] text-[#020035] font-extrabold rounded-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#FEB21A]/20 uppercase tracking-widest text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                          {submitting ? (
+                            <span className="flex items-center gap-2">
+                              <span className="animate-spin">⏳</span>
+                              Đang gửi...
+                            </span>
+                          ) : (
+                            'Gửi Enquiry'
+                          )}
+                        </button>
                         <button
                           type="button"
-                          onClick={() => {
-                            const categoryReverse: { [key: string]: string } = {
-                              'Academic': 'Academic (Học thuật)',
-                              'Visa & International': 'Visa & International Students',
-                              'Graduation & Career': 'Graduation & Career',
-                              'Welfare': 'Welfare',
-                              'Financial': 'Financial',
-                              'Other': 'Other'
-                            }
-                            setCategory(categoryReverse[aiSuggestion.category] || 'Other')
-                            toast.success(`Category updated to ${aiSuggestion.category}`)
-                          }}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FEB21A]/10 border border-[#FEB21A] text-[#6b4800] text-sm font-semibold hover:bg-[#FEB21A]/20 transition-all"
+                          onClick={() => router.back()}
+                          className="text-[#47464F] font-semibold hover:text-[#BA1A1A] transition-colors border-b border-transparent hover:border-[#BA1A1A] pb-1"
                         >
-                          <span>🤖 AI suggests:</span>
-                          <span className="font-bold">{aiSuggestion.category}</span>
-                          <span className="text-xs opacity-70">({(aiSuggestion.confidence * 100).toFixed(0)}%)</span>
+                          Hủy bỏ
                         </button>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-wider text-[#47464F]">Tài liệu đính kèm</label>
-                      <div className="border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center hover:border-[#FEB21A] bg-[#f3f3f4]/50 cursor-pointer">
-                        <span className="material-symbols-outlined text-4xl text-outline mb-3">cloud_upload</span>
-                        <p className="text-[#1a1c1c] font-semibold">Kéo và thả file hoặc click để tải lên</p>
-                        <p className="text-xs text-[#47464F] mt-1">PDF, JPG, PNG (Tối đa 10MB)</p>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-8 pt-6">
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="px-12 py-4 bg-[#FEB21A] text-[#020035] font-extrabold rounded-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#FEB21A]/20 uppercase tracking-widest text-sm disabled:opacity-70 disabled:cursor-not-allowed"
-                      >
-                        {submitting ? (
-                          <span className="flex items-center gap-2">
-                            <span className="animate-spin">⏳</span>
-                            Đang gửi...
-                          </span>
-                        ) : (
-                          'Gửi Enquiry'
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => router.back()}
-                        className="text-[#47464F] font-semibold hover:text-[#BA1A1A] transition-colors border-b border-transparent hover:border-[#BA1A1A] pb-1"
-                      >
-                        Hủy bỏ
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                    </form>
+                  </div>
                 </>
               ) : (
                 <div className="bg-white p-16 rounded-2xl shadow-sm text-center">
@@ -439,7 +431,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <p className="text-slate-300 text-sm leading-relaxed mb-5">
                     Chat để hỏi FAQ nhanh hoặc được hướng dẫn chọn lĩnh vực enquiry. Không cần login cho câu hỏi cơ bản.
                   </p>
-                  <button className="w-full py-3 bg-[#FEB21A] text-[#020035] font-bold rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2">
+                  <button 
+                    onClick={openChatbot}
+                    className="w-full py-3 bg-[#FEB21A] text-[#020035] font-bold rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2"
+                  >
                     <span className="material-symbols-outlined text-sm">chat</span>
                     Chat ngay
                   </button>
@@ -481,7 +476,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
       </main>
 
-      <ChatbotWidget />
+      <ChatbotWidget isOpen={isChatbotOpen} setIsOpen={setIsChatbotOpen} />
     </div>
   )
 }

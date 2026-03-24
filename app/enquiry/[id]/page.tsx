@@ -78,7 +78,6 @@ export default function EnquiryDetailPage() {
     fetchData()
   }, [supabase, router, enquiryId])
 
-  // Gọi AI để trả lời
   const getAiReply = async (userMessage: string, conversationHistory: any[]) => {
     try {
       const response = await fetch('/api/ai/chat', {
@@ -105,7 +104,6 @@ export default function EnquiryDetailPage() {
     setSending(true)
 
     try {
-      // Lưu tin nhắn của user
       const { data: userMessage, error: userError } = await supabase
         .from('messages')
         .insert({
@@ -123,23 +121,20 @@ export default function EnquiryDetailPage() {
         return
       }
 
-      // Cập nhật messages ngay lập tức
       const updatedMessages = [...messages, userMessage]
       setMessages(updatedMessages)
       setReplyText('')
       toast.success('Đã gửi phản hồi')
       
-      // Gọi AI để trả lời
       setIsAiThinking(true)
       const aiReply = await getAiReply(replyText, updatedMessages)
       
       if (aiReply) {
-        // Lưu tin nhắn của AI
         const { data: aiMessage, error: aiError } = await supabase
           .from('messages')
           .insert({
             enquiry_id: enquiryId,
-            sender_id: user.id, // Tạm thời dùng ID user, nhưng sẽ hiển thị là AI
+            sender_id: user.id,
             content: `🤖 **UniLink AI:** ${aiReply}`,
             is_internal: false
           })
@@ -208,16 +203,21 @@ export default function EnquiryDetailPage() {
   }
 
   const formatMessage = (msg: any) => {
-    const isStaff = msg.sender_id !== user?.id
     const isAI = msg.content?.startsWith('🤖')
+    const isStaff = !isAI && msg.sender_id !== user?.id
+    
     let senderName = ''
+    let type = 'student' // student = trái, ai/staff = phải
     
     if (isAI) {
       senderName = 'UniLink AI'
+      type = 'ai'
     } else if (isStaff) {
       senderName = 'Academic Staff'
+      type = 'staff'
     } else {
       senderName = userProfile?.full_name || 'Student'
+      type = 'student'
     }
     
     const time = new Date(msg.created_at).toLocaleString('vi-VN')
@@ -227,7 +227,7 @@ export default function EnquiryDetailPage() {
     }
     
     return {
-      type: isStaff ? 'staff' : 'student',
+      type: type,
       name: senderName,
       time: time,
       text: content,
@@ -394,20 +394,30 @@ export default function EnquiryDetailPage() {
               ) : (
                 messages.map((msg, idx) => {
                   const formatted = formatMessage(msg)
+                  // student: bên trái, ai/staff: bên phải
+                  const isRight = formatted.type === 'ai' || formatted.type === 'staff'
                   return (
-                    <div key={idx} className={`flex gap-4 ${formatted.type === 'staff' ? 'flex-row-reverse' : ''} max-w-[90%] ${formatted.type === 'staff' ? 'ml-auto' : ''}`}>
-                      <div className={`flex-shrink-0 w-8 h-8 rounded-full mt-6 flex items-center justify-center text-lg ${formatted.type === 'staff' ? 'bg-primary' : 'bg-slate-200'}`}>
-                        {formatted.type === 'staff' ? '👨‍💼' : '👤'}
+                    <div key={idx} className={`flex gap-4 ${isRight ? 'flex-row-reverse' : ''} max-w-[90%] ${isRight ? 'ml-auto' : ''}`}>
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full mt-6 flex items-center justify-center text-lg ${
+                        isRight ? 'bg-[#020035]' : 'bg-slate-200'
+                      }`}>
+                        {formatted.type === 'ai' ? '🤖' : (isRight ? '👨‍💼' : '👤')}
                       </div>
-                      <div className={`flex flex-col ${formatted.type === 'staff' ? 'items-end' : 'items-start'} gap-1`}>
-                        <div className={`flex items-center gap-2 px-1 ${formatted.type === 'staff' ? 'flex-row-reverse' : ''}`}>
-                          <span className={`text-[11px] font-bold ${formatted.isAI ? 'text-[#FEB21A]' : 'text-primary'} uppercase`}>{formatted.name}</span>
+                      <div className={`flex flex-col ${isRight ? 'items-end' : 'items-start'} gap-1`}>
+                        <div className={`flex items-center gap-2 px-1 ${isRight ? 'flex-row-reverse' : ''}`}>
+                          <span className={`text-[11px] font-bold ${formatted.isAI ? 'text-[#FEB21A]' : 'text-primary'} uppercase`}>
+                            {formatted.name}
+                          </span>
                           <span className="text-[10px] text-slate-600">{formatted.time}</span>
                         </div>
-                        <div className={`p-4 rounded-2xl text-sm leading-relaxed ${formatted.type === 'staff' ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-slate-900 border border-slate-200 rounded-tl-none'}`}>
+                        <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
+                          isRight 
+                            ? 'bg-[#020035] text-white rounded-tr-none' 
+                            : 'bg-white text-slate-900 border border-slate-200 rounded-tl-none'
+                        }`}>
                           {formatted.text}
                           {formatted.isAI && (
-                            <div className="mt-2 pt-2 border-t border-gray-200 text-[10px] text-gray-400 flex items-center gap-1">
+                            <div className="mt-2 pt-2 border-t border-white/20 text-[10px] text-white/60 flex items-center gap-1">
                               <span>🤖</span> Generated by AI
                             </div>
                           )}
@@ -418,13 +428,13 @@ export default function EnquiryDetailPage() {
                 })
               )}
               {isAiThinking && (
-                <div className="flex justify-start">
-                  <div className="bg-white border border-gray-200 p-3 rounded-xl">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                      <span className="text-xs text-gray-400 ml-1">AI is thinking...</span>
+                <div className="flex justify-end">
+                  <div className="bg-[#020035] text-white p-3 rounded-xl rounded-tr-none">
+                    <div className="flex gap-1 items-center">
+                      <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      <span className="text-xs ml-1">AI is thinking...</span>
                     </div>
                   </div>
                 </div>
