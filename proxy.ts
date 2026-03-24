@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function proxy(request: NextRequest) {  // Đổi từ middleware thành proxy
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -26,10 +26,8 @@ export async function proxy(request: NextRequest) {  // Đổi từ middleware t
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Thêm /api vào danh sách public routes
   const publicRoutes = ['/', '/login', '/signup', '/auth/callback']
   
-  // Cho phép tất cả API routes (bắt đầu bằng /api)
   if (pathname.startsWith('/api')) {
     return supabaseResponse
   }
