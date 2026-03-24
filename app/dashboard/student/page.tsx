@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -19,7 +19,7 @@ const theme = {
   }
 }
 
-export default function StudentDashboard() {
+function StudentDashboardContent() {
   const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
@@ -377,5 +377,13 @@ export default function StudentDashboard() {
         <ChatbotWidget />
       </main>
     </div>
+  )
+}
+
+export default function StudentDashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StudentDashboardContent />
+    </Suspense>
   )
 }
