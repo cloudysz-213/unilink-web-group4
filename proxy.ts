@@ -23,11 +23,19 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
+  // Debug logging for production
+  console.log('Middleware check:', {
+    pathname,
+    hasUser: !!user,
+    userId: user?.id,
+    error: error?.message
+  })
+
   const publicRoutes = ['/', '/login', '/signup', '/auth/callback']
-  
+
   if (pathname.startsWith('/api')) {
     return supabaseResponse
   }
@@ -37,9 +45,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!user) {
+    console.log('No user found, redirecting to login from:', pathname)
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  console.log('User authenticated, allowing access to:', pathname)
   return supabaseResponse
 }
 
