@@ -57,7 +57,7 @@ export default function Home() {
               <img 
                 alt="VNU International School - Student Journey" 
                 className="relative rounded-2xl shadow-2xl object-cover aspect-[4/5] max-h-[550px] w-full border border-white/10" 
-                src="https://www.is.vnu.edu.vn/wp-content/uploads/2025/04/IMG_2833-scaled.jpg"
+                src="https://www.is.vnu.edu.vn/wp-content/uploads/2025/04/z6502996794837_d0e642903467d3d1259c85a5f5ee34b1-1.jpg"
               />
             </div>
           </div>
