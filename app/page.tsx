@@ -53,7 +53,12 @@ export default function Home() {
           <div className="lg:col-span-5 hidden lg:block">
             <div className="relative">
               <div className="absolute -inset-4 bg-[#FEB21A]/10 rounded-2xl blur-2xl"></div>
-              <img alt="Student support interface" className="relative rounded-2xl shadow-2xl object-cover aspect-[4/5] max-h-[550px] w-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnBGq0Rw5IvrX7lNXQKFii2eJ-WPLzXWC2_ZiPhtzX-OvX9XYKDd07LeVQ87Wah_3KNG8w-3CxkC18fpU3AyqkrDFD3WEugdNiemAxMpCheitYAqxR7RQXr4vTOMzE7Lgy86uzUeyDzvwlQauoxmPgXYfmQ-aU9yK7KXwURSQ-IEVqmov2lGnLRDYYB_EFbjWsl_yK8Lj8aIXzj31ihWAEKrsjo_tbkgCGQ6Jjdp9naFDUenZ9nPfTUj6tAKU-kcmYvbwnc6upFrc"/>
+              {/* ĐÃ THAY ẢNH MỚI */}
+              <img 
+                alt="VNU International School - Student Journey" 
+                className="relative rounded-2xl shadow-2xl object-cover aspect-[4/5] max-h-[550px] w-full border border-white/10" 
+                src="https://www.is.vnu.edu.vn/wp-content/uploads/2025/04/IMG_2833-scaled.jpg"
+              />
             </div>
           </div>
         </div>
@@ -211,4 +216,3 @@ export default function Home() {
     </main>
   )
 }
-
