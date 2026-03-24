@@ -19,7 +19,7 @@ const theme = {
   }
 }
 
-function StudentDashboardContent() {
+function StudentDashboardInner() {
   const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
@@ -382,8 +382,8 @@ function StudentDashboardContent() {
 
 export default function StudentDashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <StudentDashboardContent />
+    <Suspense fallback={null}>
+      <StudentDashboardInner />
     </Suspense>
   )
 }
