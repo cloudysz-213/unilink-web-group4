@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
   const { data: { user }, error } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  // Debug logging for production
+  // Debug logging
   console.log('Middleware check:', {
     pathname,
     hasUser: !!user,
@@ -34,19 +34,25 @@ export async function proxy(request: NextRequest) {
     error: error?.message
   })
 
+  // Public routes
   const publicRoutes = ['/', '/login', '/signup', '/auth/callback']
-
+  
+  // API routes - luôn cho phép
   if (pathname.startsWith('/api')) {
     return supabaseResponse
   }
 
+  // Public routes - cho phép
   if (publicRoutes.includes(pathname)) {
     return supabaseResponse
   }
 
+  // Nếu chưa đăng nhập, redirect về login với redirect param
   if (!user) {
     console.log('No user found, redirecting to login from:', pathname)
-    return NextResponse.redirect(new URL('/login', request.url))
+    const redirectUrl = new URL('/login', request.url)
+    redirectUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(redirectUrl)
   }
 
   console.log('User authenticated, allowing access to:', pathname)

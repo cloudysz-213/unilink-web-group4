@@ -309,10 +309,20 @@ export default function AppointmentsPage() {
                   <div className="flex items-center gap-3">
                     <button onClick={prevMonth} className="p-2 hover:bg-white/10 rounded-lg"><ChevronLeft size={20} /></button>
                     <div className="flex gap-2">
-                      <select value={currentMonth} onChange={handleMonthChange} className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm">
+                      {/* FIXED: select tháng - nền trắng, chữ đen */}
+                      <select 
+                        value={currentMonth} 
+                        onChange={handleMonthChange} 
+                        className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-medium text-[#020035] focus:ring-2 focus:ring-[#FEB21A] outline-none"
+                      >
                         {months.map(m => <option key={m.value} value={m.value}>{m.name}</option>)}
                       </select>
-                      <select value={currentYear} onChange={handleYearChange} className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm">
+                      {/* FIXED: select năm - nền trắng, chữ đen */}
+                      <select 
+                        value={currentYear} 
+                        onChange={handleYearChange} 
+                        className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-medium text-[#020035] focus:ring-2 focus:ring-[#FEB21A] outline-none"
+                      >
                         {years.map(y => <option key={y}>{y}</option>)}
                       </select>
                     </div>
